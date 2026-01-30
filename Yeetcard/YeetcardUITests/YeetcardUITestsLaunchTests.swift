@@ -1,13 +1,13 @@
 //
-//  YeetcardhUITestsLaunchTests.swift
-//  YeetcardhUITests
+//  YeetcardUITestsLaunchTests.swift
+//  YeetcardUITests
 //
 //  Created by Rishi Malik on 12/9/25.
 //
 
 import XCTest
 
-final class YeetcardhUITestsLaunchTests: XCTestCase {
+final class YeetcardUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

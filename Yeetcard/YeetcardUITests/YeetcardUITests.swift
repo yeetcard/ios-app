@@ -1,13 +1,13 @@
 //
-//  YeetcardhUITests.swift
-//  YeetcardhUITests
+//  YeetcardUITests.swift
+//  YeetcardUITests
 //
 //  Created by Rishi Malik on 12/9/25.
 //
 
 import XCTest
 
-final class YeetcardhUITests: XCTestCase {
+final class YeetcardUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

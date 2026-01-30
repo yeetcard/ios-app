@@ -1,6 +1,6 @@
 //
-//  YeetcardhApp.swift
-//  Yeetcardh
+//  YeetcardApp.swift
+//  Yeetcard
 //
 //  Created by Rishi Malik on 12/9/25.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct YeetcardhApp: App {
+struct YeetcardApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,

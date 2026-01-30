@@ -1,6 +1,6 @@
 //
 //  Item.swift
-//  Yeetcardh
+//  Yeetcard
 //
 //  Created by Rishi Malik on 12/9/25.
 //

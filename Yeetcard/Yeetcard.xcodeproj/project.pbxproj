@@ -7,75 +7,75 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
-		88729CCA2EE90A0700F2F101 /* PBXContainerItemProxy */ = {
+		88729D132EE90FB000F2F101 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 88729CB02EE90A0500F2F101 /* Project object */;
+			containerPortal = 88729CF92EE90FAF00F2F101 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 88729CB72EE90A0500F2F101;
-			remoteInfo = Yeetcardh;
+			remoteGlobalIDString = 88729D002EE90FAF00F2F101;
+			remoteInfo = Yeetcard;
 		};
-		88729CD42EE90A0700F2F101 /* PBXContainerItemProxy */ = {
+		88729D1D2EE90FB000F2F101 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 88729CB02EE90A0500F2F101 /* Project object */;
+			containerPortal = 88729CF92EE90FAF00F2F101 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 88729CB72EE90A0500F2F101;
-			remoteInfo = Yeetcardh;
+			remoteGlobalIDString = 88729D002EE90FAF00F2F101;
+			remoteInfo = Yeetcard;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		88729CB82EE90A0500F2F101 /* Yeetcardh.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yeetcardh.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		88729CC92EE90A0700F2F101 /* YeetcardhTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YeetcardhTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		88729CD32EE90A0700F2F101 /* YeetcardhUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YeetcardhUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		88729D012EE90FAF00F2F101 /* Yeetcard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yeetcard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		88729D122EE90FB000F2F101 /* YeetcardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YeetcardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		88729D1C2EE90FB000F2F101 /* YeetcardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YeetcardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		88729CDB2EE90A0700F2F101 /* Exceptions for "Yeetcardh" folder in "Yeetcardh" target */ = {
+		88729D242EE90FB000F2F101 /* Exceptions for "Yeetcard" folder in "Yeetcard" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 88729CB72EE90A0500F2F101 /* Yeetcardh */;
+			target = 88729D002EE90FAF00F2F101 /* Yeetcard */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		88729CBA2EE90A0500F2F101 /* Yeetcardh */ = {
+		88729D032EE90FAF00F2F101 /* Yeetcard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				88729CDB2EE90A0700F2F101 /* Exceptions for "Yeetcardh" folder in "Yeetcardh" target */,
+				88729D242EE90FB000F2F101 /* Exceptions for "Yeetcard" folder in "Yeetcard" target */,
 			);
-			path = Yeetcardh;
+			path = Yeetcard;
 			sourceTree = "<group>";
 		};
-		88729CCC2EE90A0700F2F101 /* YeetcardhTests */ = {
+		88729D152EE90FB000F2F101 /* YeetcardTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = YeetcardhTests;
+			path = YeetcardTests;
 			sourceTree = "<group>";
 		};
-		88729CD62EE90A0700F2F101 /* YeetcardhUITests */ = {
+		88729D1F2EE90FB000F2F101 /* YeetcardUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = YeetcardhUITests;
+			path = YeetcardUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		88729CB52EE90A0500F2F101 /* Frameworks */ = {
+		88729CFE2EE90FAF00F2F101 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		88729CC62EE90A0700F2F101 /* Frameworks */ = {
+		88729D0F2EE90FB000F2F101 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		88729CD02EE90A0700F2F101 /* Frameworks */ = {
+		88729D192EE90FB000F2F101 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -85,22 +85,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		88729CAF2EE90A0500F2F101 = {
+		88729CF82EE90FAF00F2F101 = {
 			isa = PBXGroup;
 			children = (
-				88729CBA2EE90A0500F2F101 /* Yeetcardh */,
-				88729CCC2EE90A0700F2F101 /* YeetcardhTests */,
-				88729CD62EE90A0700F2F101 /* YeetcardhUITests */,
-				88729CB92EE90A0500F2F101 /* Products */,
+				88729D032EE90FAF00F2F101 /* Yeetcard */,
+				88729D152EE90FB000F2F101 /* YeetcardTests */,
+				88729D1F2EE90FB000F2F101 /* YeetcardUITests */,
+				88729D022EE90FAF00F2F101 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		88729CB92EE90A0500F2F101 /* Products */ = {
+		88729D022EE90FAF00F2F101 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				88729CB82EE90A0500F2F101 /* Yeetcardh.app */,
-				88729CC92EE90A0700F2F101 /* YeetcardhTests.xctest */,
-				88729CD32EE90A0700F2F101 /* YeetcardhUITests.xctest */,
+				88729D012EE90FAF00F2F101 /* Yeetcard.app */,
+				88729D122EE90FB000F2F101 /* YeetcardTests.xctest */,
+				88729D1C2EE90FB000F2F101 /* YeetcardUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,134 +108,134 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		88729CB72EE90A0500F2F101 /* Yeetcardh */ = {
+		88729D002EE90FAF00F2F101 /* Yeetcard */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 88729CDC2EE90A0700F2F101 /* Build configuration list for PBXNativeTarget "Yeetcardh" */;
+			buildConfigurationList = 88729D252EE90FB000F2F101 /* Build configuration list for PBXNativeTarget "Yeetcard" */;
 			buildPhases = (
-				88729CB42EE90A0500F2F101 /* Sources */,
-				88729CB52EE90A0500F2F101 /* Frameworks */,
-				88729CB62EE90A0500F2F101 /* Resources */,
+				88729CFD2EE90FAF00F2F101 /* Sources */,
+				88729CFE2EE90FAF00F2F101 /* Frameworks */,
+				88729CFF2EE90FAF00F2F101 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				88729CBA2EE90A0500F2F101 /* Yeetcardh */,
+				88729D032EE90FAF00F2F101 /* Yeetcard */,
 			);
-			name = Yeetcardh;
+			name = Yeetcard;
 			packageProductDependencies = (
 			);
-			productName = Yeetcardh;
-			productReference = 88729CB82EE90A0500F2F101 /* Yeetcardh.app */;
+			productName = Yeetcard;
+			productReference = 88729D012EE90FAF00F2F101 /* Yeetcard.app */;
 			productType = "com.apple.product-type.application";
 		};
-		88729CC82EE90A0700F2F101 /* YeetcardhTests */ = {
+		88729D112EE90FB000F2F101 /* YeetcardTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 88729CE12EE90A0700F2F101 /* Build configuration list for PBXNativeTarget "YeetcardhTests" */;
+			buildConfigurationList = 88729D2A2EE90FB000F2F101 /* Build configuration list for PBXNativeTarget "YeetcardTests" */;
 			buildPhases = (
-				88729CC52EE90A0700F2F101 /* Sources */,
-				88729CC62EE90A0700F2F101 /* Frameworks */,
-				88729CC72EE90A0700F2F101 /* Resources */,
+				88729D0E2EE90FB000F2F101 /* Sources */,
+				88729D0F2EE90FB000F2F101 /* Frameworks */,
+				88729D102EE90FB000F2F101 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				88729CCB2EE90A0700F2F101 /* PBXTargetDependency */,
+				88729D142EE90FB000F2F101 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				88729CCC2EE90A0700F2F101 /* YeetcardhTests */,
+				88729D152EE90FB000F2F101 /* YeetcardTests */,
 			);
-			name = YeetcardhTests;
+			name = YeetcardTests;
 			packageProductDependencies = (
 			);
-			productName = YeetcardhTests;
-			productReference = 88729CC92EE90A0700F2F101 /* YeetcardhTests.xctest */;
+			productName = YeetcardTests;
+			productReference = 88729D122EE90FB000F2F101 /* YeetcardTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		88729CD22EE90A0700F2F101 /* YeetcardhUITests */ = {
+		88729D1B2EE90FB000F2F101 /* YeetcardUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 88729CE42EE90A0700F2F101 /* Build configuration list for PBXNativeTarget "YeetcardhUITests" */;
+			buildConfigurationList = 88729D2D2EE90FB000F2F101 /* Build configuration list for PBXNativeTarget "YeetcardUITests" */;
 			buildPhases = (
-				88729CCF2EE90A0700F2F101 /* Sources */,
-				88729CD02EE90A0700F2F101 /* Frameworks */,
-				88729CD12EE90A0700F2F101 /* Resources */,
+				88729D182EE90FB000F2F101 /* Sources */,
+				88729D192EE90FB000F2F101 /* Frameworks */,
+				88729D1A2EE90FB000F2F101 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				88729CD52EE90A0700F2F101 /* PBXTargetDependency */,
+				88729D1E2EE90FB000F2F101 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				88729CD62EE90A0700F2F101 /* YeetcardhUITests */,
+				88729D1F2EE90FB000F2F101 /* YeetcardUITests */,
 			);
-			name = YeetcardhUITests;
+			name = YeetcardUITests;
 			packageProductDependencies = (
 			);
-			productName = YeetcardhUITests;
-			productReference = 88729CD32EE90A0700F2F101 /* YeetcardhUITests.xctest */;
+			productName = YeetcardUITests;
+			productReference = 88729D1C2EE90FB000F2F101 /* YeetcardUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		88729CB02EE90A0500F2F101 /* Project object */ = {
+		88729CF92EE90FAF00F2F101 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
-					88729CB72EE90A0500F2F101 = {
+					88729D002EE90FAF00F2F101 = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
-					88729CC82EE90A0700F2F101 = {
+					88729D112EE90FB000F2F101 = {
 						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = 88729CB72EE90A0500F2F101;
+						TestTargetID = 88729D002EE90FAF00F2F101;
 					};
-					88729CD22EE90A0700F2F101 = {
+					88729D1B2EE90FB000F2F101 = {
 						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = 88729CB72EE90A0500F2F101;
+						TestTargetID = 88729D002EE90FAF00F2F101;
 					};
 				};
 			};
-			buildConfigurationList = 88729CB32EE90A0500F2F101 /* Build configuration list for PBXProject "Yeetcardh" */;
+			buildConfigurationList = 88729CFC2EE90FAF00F2F101 /* Build configuration list for PBXProject "Yeetcard" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 88729CAF2EE90A0500F2F101;
+			mainGroup = 88729CF82EE90FAF00F2F101;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 88729CB92EE90A0500F2F101 /* Products */;
+			productRefGroup = 88729D022EE90FAF00F2F101 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				88729CB72EE90A0500F2F101 /* Yeetcardh */,
-				88729CC82EE90A0700F2F101 /* YeetcardhTests */,
-				88729CD22EE90A0700F2F101 /* YeetcardhUITests */,
+				88729D002EE90FAF00F2F101 /* Yeetcard */,
+				88729D112EE90FB000F2F101 /* YeetcardTests */,
+				88729D1B2EE90FB000F2F101 /* YeetcardUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		88729CB62EE90A0500F2F101 /* Resources */ = {
+		88729CFF2EE90FAF00F2F101 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		88729CC72EE90A0700F2F101 /* Resources */ = {
+		88729D102EE90FB000F2F101 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		88729CD12EE90A0700F2F101 /* Resources */ = {
+		88729D1A2EE90FB000F2F101 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -245,21 +245,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		88729CB42EE90A0500F2F101 /* Sources */ = {
+		88729CFD2EE90FAF00F2F101 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		88729CC52EE90A0700F2F101 /* Sources */ = {
+		88729D0E2EE90FB000F2F101 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		88729CCF2EE90A0700F2F101 /* Sources */ = {
+		88729D182EE90FB000F2F101 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -269,20 +269,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		88729CCB2EE90A0700F2F101 /* PBXTargetDependency */ = {
+		88729D142EE90FB000F2F101 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 88729CB72EE90A0500F2F101 /* Yeetcardh */;
-			targetProxy = 88729CCA2EE90A0700F2F101 /* PBXContainerItemProxy */;
+			target = 88729D002EE90FAF00F2F101 /* Yeetcard */;
+			targetProxy = 88729D132EE90FB000F2F101 /* PBXContainerItemProxy */;
 		};
-		88729CD52EE90A0700F2F101 /* PBXTargetDependency */ = {
+		88729D1E2EE90FB000F2F101 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 88729CB72EE90A0500F2F101 /* Yeetcardh */;
-			targetProxy = 88729CD42EE90A0700F2F101 /* PBXContainerItemProxy */;
+			target = 88729D002EE90FAF00F2F101 /* Yeetcard */;
+			targetProxy = 88729D1D2EE90FB000F2F101 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		88729CDD2EE90A0700F2F101 /* Debug */ = {
+		88729D262EE90FB000F2F101 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -295,7 +295,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Yeetcardh/Info.plist;
+				INFOPLIST_FILE = Yeetcard/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -311,7 +311,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.Yeetcardh;
+				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.yeetcard1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -327,7 +327,7 @@
 			};
 			name = Debug;
 		};
-		88729CDE2EE90A0700F2F101 /* Release */ = {
+		88729D272EE90FB000F2F101 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -340,7 +340,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Yeetcardh/Info.plist;
+				INFOPLIST_FILE = Yeetcard/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -356,7 +356,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.Yeetcardh;
+				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.yeetcard1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -372,7 +372,7 @@
 			};
 			name = Release;
 		};
-		88729CDF2EE90A0700F2F101 /* Debug */ = {
+		88729D282EE90FB000F2F101 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -434,7 +434,7 @@
 			};
 			name = Debug;
 		};
-		88729CE02EE90A0700F2F101 /* Release */ = {
+		88729D292EE90FB000F2F101 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -488,7 +488,7 @@
 			};
 			name = Release;
 		};
-		88729CE22EE90A0700F2F101 /* Debug */ = {
+		88729D2B2EE90FB000F2F101 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -499,7 +499,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardhTests;
+				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -509,12 +509,12 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yeetcardh.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Yeetcardh";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yeetcard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Yeetcard";
 				XROS_DEPLOYMENT_TARGET = 26.1;
 			};
 			name = Debug;
 		};
-		88729CE32EE90A0700F2F101 /* Release */ = {
+		88729D2C2EE90FB000F2F101 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -525,7 +525,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardhTests;
+				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -535,12 +535,12 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yeetcardh.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Yeetcardh";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Yeetcard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Yeetcard";
 				XROS_DEPLOYMENT_TARGET = 26.1;
 			};
 			name = Release;
 		};
-		88729CE52EE90A0700F2F101 /* Debug */ = {
+		88729D2E2EE90FB000F2F101 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -550,7 +550,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardhUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -560,12 +560,12 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = Yeetcardh;
+				TEST_TARGET_NAME = Yeetcard;
 				XROS_DEPLOYMENT_TARGET = 26.1;
 			};
 			name = Debug;
 		};
-		88729CE62EE90A0700F2F101 /* Release */ = {
+		88729D2F2EE90FB000F2F101 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -575,7 +575,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardhUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = Yeetcard.YeetcardUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -585,7 +585,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = Yeetcardh;
+				TEST_TARGET_NAME = Yeetcard;
 				XROS_DEPLOYMENT_TARGET = 26.1;
 			};
 			name = Release;
@@ -593,43 +593,43 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		88729CB32EE90A0500F2F101 /* Build configuration list for PBXProject "Yeetcardh" */ = {
+		88729CFC2EE90FAF00F2F101 /* Build configuration list for PBXProject "Yeetcard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				88729CDF2EE90A0700F2F101 /* Debug */,
-				88729CE02EE90A0700F2F101 /* Release */,
+				88729D282EE90FB000F2F101 /* Debug */,
+				88729D292EE90FB000F2F101 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		88729CDC2EE90A0700F2F101 /* Build configuration list for PBXNativeTarget "Yeetcardh" */ = {
+		88729D252EE90FB000F2F101 /* Build configuration list for PBXNativeTarget "Yeetcard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				88729CDD2EE90A0700F2F101 /* Debug */,
-				88729CDE2EE90A0700F2F101 /* Release */,
+				88729D262EE90FB000F2F101 /* Debug */,
+				88729D272EE90FB000F2F101 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		88729CE12EE90A0700F2F101 /* Build configuration list for PBXNativeTarget "YeetcardhTests" */ = {
+		88729D2A2EE90FB000F2F101 /* Build configuration list for PBXNativeTarget "YeetcardTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				88729CE22EE90A0700F2F101 /* Debug */,
-				88729CE32EE90A0700F2F101 /* Release */,
+				88729D2B2EE90FB000F2F101 /* Debug */,
+				88729D2C2EE90FB000F2F101 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		88729CE42EE90A0700F2F101 /* Build configuration list for PBXNativeTarget "YeetcardhUITests" */ = {
+		88729D2D2EE90FB000F2F101 /* Build configuration list for PBXNativeTarget "YeetcardUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				88729CE52EE90A0700F2F101 /* Debug */,
-				88729CE62EE90A0700F2F101 /* Release */,
+				88729D2E2EE90FB000F2F101 /* Debug */,
+				88729D2F2EE90FB000F2F101 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 88729CB02EE90A0500F2F101 /* Project object */;
+	rootObject = 88729CF92EE90FAF00F2F101 /* Project object */;
 }
