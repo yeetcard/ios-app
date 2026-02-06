@@ -2,9 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Yeetcard needs camera access to scan barcodes on your loyalty and membership cards.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Yeetcard uses Face ID to protect your cards from unauthorized access.</string>
 </dict>
 </plist>
