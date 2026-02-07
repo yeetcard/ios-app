@@ -6,10 +6,22 @@
 import AVFoundation
 import UIKit
 
+protocol CameraServiceProtocol: AnyObject {
+    var delegate: (any CameraServiceDelegate)? { get set }
+    var previewLayer: AVCaptureVideoPreviewLayer { get }
+    var isFlashAvailable: Bool { get }
+    var isFlashOn: Bool { get set }
+    func setupSession() async throws
+    func startSession()
+    func stopSession()
+    func capturePhoto()
+    func toggleFlash()
+}
+
 protocol CameraServiceDelegate: AnyObject {
-    func cameraService(_ service: CameraService, didCapturePhoto image: UIImage)
-    func cameraService(_ service: CameraService, didOutputSampleBuffer sampleBuffer: CMSampleBuffer)
-    func cameraService(_ service: CameraService, didFailWithError error: CameraError)
+    func cameraService(_ service: any CameraServiceProtocol, didCapturePhoto image: UIImage)
+    func cameraService(_ service: any CameraServiceProtocol, didOutputSampleBuffer sampleBuffer: CMSampleBuffer)
+    func cameraService(_ service: any CameraServiceProtocol, didFailWithError error: CameraError)
 }
 
 enum CameraError: Error, LocalizedError {
@@ -32,8 +44,8 @@ enum CameraError: Error, LocalizedError {
     }
 }
 
-final class CameraService: NSObject {
-    weak var delegate: CameraServiceDelegate?
+final class CameraService: NSObject, CameraServiceProtocol {
+    weak var delegate: (any CameraServiceDelegate)?
 
     private let captureSession = AVCaptureSession()
     private var photoOutput: AVCapturePhotoOutput?
@@ -43,11 +55,11 @@ final class CameraService: NSObject {
     private let sessionQueue = DispatchQueue(label: "com.yeetcard.camera.session")
     private let videoOutputQueue = DispatchQueue(label: "com.yeetcard.camera.video")
 
-    var previewLayer: AVCaptureVideoPreviewLayer {
+    private(set) lazy var previewLayer: AVCaptureVideoPreviewLayer = {
         let layer = AVCaptureVideoPreviewLayer(session: captureSession)
         layer.videoGravity = .resizeAspectFill
         return layer
-    }
+    }()
 
     var isFlashAvailable: Bool {
         currentDevice?.hasTorch ?? false
@@ -68,40 +80,51 @@ final class CameraService: NSObject {
         }
     }
 
-    func setupSession() throws {
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
-            throw CameraError.cameraUnavailable
-        }
+    func setupSession() async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            sessionQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(throwing: CameraError.setupFailed)
+                    return
+                }
 
-        currentDevice = device
+                guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+                    continuation.resume(throwing: CameraError.cameraUnavailable)
+                    return
+                }
 
-        captureSession.beginConfiguration()
-        captureSession.sessionPreset = .photo
+                self.currentDevice = device
 
-        do {
-            let input = try AVCaptureDeviceInput(device: device)
-            if captureSession.canAddInput(input) {
-                captureSession.addInput(input)
+                self.captureSession.beginConfiguration()
+                self.captureSession.sessionPreset = .photo
+
+                do {
+                    let input = try AVCaptureDeviceInput(device: device)
+                    if self.captureSession.canAddInput(input) {
+                        self.captureSession.addInput(input)
+                    }
+
+                    let photoOutput = AVCapturePhotoOutput()
+                    if self.captureSession.canAddOutput(photoOutput) {
+                        self.captureSession.addOutput(photoOutput)
+                        self.photoOutput = photoOutput
+                    }
+
+                    let videoOutput = AVCaptureVideoDataOutput()
+                    videoOutput.setSampleBufferDelegate(self, queue: self.videoOutputQueue)
+                    videoOutput.alwaysDiscardsLateVideoFrames = true
+                    if self.captureSession.canAddOutput(videoOutput) {
+                        self.captureSession.addOutput(videoOutput)
+                        self.videoOutput = videoOutput
+                    }
+
+                    self.captureSession.commitConfiguration()
+                    continuation.resume()
+                } catch {
+                    self.captureSession.commitConfiguration()
+                    continuation.resume(throwing: CameraError.setupFailed)
+                }
             }
-
-            let photoOutput = AVCapturePhotoOutput()
-            if captureSession.canAddOutput(photoOutput) {
-                captureSession.addOutput(photoOutput)
-                self.photoOutput = photoOutput
-            }
-
-            let videoOutput = AVCaptureVideoDataOutput()
-            videoOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
-            videoOutput.alwaysDiscardsLateVideoFrames = true
-            if captureSession.canAddOutput(videoOutput) {
-                captureSession.addOutput(videoOutput)
-                self.videoOutput = videoOutput
-            }
-
-            captureSession.commitConfiguration()
-        } catch {
-            captureSession.commitConfiguration()
-            throw CameraError.setupFailed
         }
     }
 
