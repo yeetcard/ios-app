@@ -106,6 +106,29 @@ final class CardDataService {
         card.isInWallet = isInWallet
         try? modelContext.save()
     }
+
+    // MARK: - Group Operations
+
+    func fetchAllGroups() -> [CardGroup] {
+        let descriptor = FetchDescriptor<CardGroup>(sortBy: [SortDescriptor(\.dateCreated, order: .reverse)])
+        return (try? modelContext.fetch(descriptor)) ?? []
+    }
+
+    func createGroup(name: String, cards: [Card]) -> CardGroup {
+        let group = CardGroup(name: name, cards: cards)
+        modelContext.insert(group)
+        try? modelContext.save()
+        return group
+    }
+
+    func deleteGroup(_ group: CardGroup) {
+        modelContext.delete(group)
+        try? modelContext.save()
+    }
+
+    func updateGroup(_ group: CardGroup) {
+        try? modelContext.save()
+    }
 }
 
 enum CardSortOption: String, CaseIterable {

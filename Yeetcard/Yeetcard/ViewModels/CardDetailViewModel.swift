@@ -22,6 +22,7 @@ final class CardDetailViewModel {
     var walletError: String?
     var showDeleteConfirmation: Bool = false
     var isBrightnessBoostEnabled: Bool = false
+    private var previousBrightness: CGFloat = 0.5
 
     var cardImage: UIImage? {
         guard !card.imagePath.isEmpty else { return nil }
@@ -119,7 +120,10 @@ final class CardDetailViewModel {
         isBrightnessBoostEnabled.toggle()
 
         if isBrightnessBoostEnabled {
+            previousBrightness = UIScreen.main.brightness
             UIScreen.main.brightness = 1.0
+        } else {
+            UIScreen.main.brightness = previousBrightness
         }
     }
 }

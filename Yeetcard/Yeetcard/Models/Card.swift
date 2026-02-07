@@ -19,6 +19,7 @@ final class Card {
     var notes: String
     var dateAdded: Date
     var lastUsed: Date?
+    var group: CardGroup?
 
     var barcodeFormat: BarcodeFormat {
         get {
@@ -44,7 +45,8 @@ final class Card {
         isFavorite: Bool = false,
         notes: String = "",
         dateAdded: Date = Date(),
-        lastUsed: Date? = nil
+        lastUsed: Date? = nil,
+        group: CardGroup? = nil
     ) {
         self.id = id
         self.name = name
@@ -57,5 +59,6 @@ final class Card {
         self.notes = notes
         self.dateAdded = dateAdded
         self.lastUsed = lastUsed
+        self.group = group
     }
 }

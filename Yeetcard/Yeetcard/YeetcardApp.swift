@@ -15,6 +15,7 @@ struct YeetcardApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Card.self,
+            CardGroup.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
