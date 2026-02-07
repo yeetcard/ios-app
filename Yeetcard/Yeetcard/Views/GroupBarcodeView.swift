@@ -11,8 +11,6 @@ struct GroupBarcodeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: GroupBarcodeViewModel
     @State private var currentPage: Int = 0
-    @State private var showDetail = false
-    @State private var cardShowingRendered: [UUID: Bool] = [:]
 
     init(group: CardGroup) {
         _viewModel = State(initialValue: GroupBarcodeViewModel(group: group))
@@ -35,38 +33,33 @@ struct GroupBarcodeView: View {
 
                     TabView(selection: $currentPage) {
                         ForEach(Array(viewModel.cards.enumerated()), id: \.element.id) { index, card in
-                            SingleCardBarcodeContent(
-                                card: card,
-                                showingRendered: bindingForCard(card)
-                            )
-                            .tag(index)
+                            SingleCardBarcodeContent(card: card)
+                                .tag(index)
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .automatic))
 
-                    bottomControls
+                    HStack(spacing: 30) {
+                        if let card = currentCard {
+                            NavigationLink {
+                                CardDetailView(card: card)
+                            } label: {
+                                Label("Details", systemImage: "info.circle")
+                                    .font(.subheadline)
+                            }
+                            .tint(.white)
+                        }
+                    }
+                    .padding(.bottom, 30)
                 }
             }
         }
         .navigationTitle(viewModel.group.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                if let card = currentCard {
-                    NavigationLink {
-                        CardDetailView(card: card)
-                    } label: {
-                        Image(systemName: "info.circle")
-                    }
-                    .tint(.white)
-                }
-            }
-        }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
             viewModel.activateBrightnessBoost()
-            initializeCardStates()
         }
         .onDisappear {
             viewModel.deactivateBrightnessBoost()
@@ -79,40 +72,6 @@ struct GroupBarcodeView: View {
     private var currentCard: Card? {
         guard currentPage >= 0 && currentPage < viewModel.cards.count else { return nil }
         return viewModel.cards[currentPage]
-    }
-
-    private var bottomControls: some View {
-        HStack(spacing: 30) {
-            if let card = currentCard, card.barcodeFormat.canGenerate, !card.imagePath.isEmpty {
-                let isShowingRendered = cardShowingRendered[card.id] ?? true
-                Button {
-                    cardShowingRendered[card.id] = !isShowingRendered
-                } label: {
-                    Label(
-                        isShowingRendered ? "Photo" : "Barcode",
-                        systemImage: isShowingRendered ? "photo" : "barcode"
-                    )
-                    .font(.subheadline)
-                }
-                .tint(.white)
-            }
-        }
-        .padding(.bottom, 30)
-    }
-
-    private func bindingForCard(_ card: Card) -> Binding<Bool> {
-        Binding(
-            get: { cardShowingRendered[card.id] ?? card.barcodeFormat.canGenerate },
-            set: { cardShowingRendered[card.id] = $0 }
-        )
-    }
-
-    private func initializeCardStates() {
-        for card in viewModel.cards {
-            if cardShowingRendered[card.id] == nil {
-                cardShowingRendered[card.id] = card.barcodeFormat.canGenerate
-            }
-        }
     }
 }
 

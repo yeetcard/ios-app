@@ -23,10 +23,7 @@ struct FullScreenBarcodeView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                SingleCardBarcodeContent(
-                    card: viewModel.card,
-                    showingRendered: $viewModel.showingRenderedBarcode
-                )
+                SingleCardBarcodeContent(card: viewModel.card)
 
                 Spacer()
 
@@ -60,18 +57,13 @@ struct FullScreenBarcodeView: View {
 
     private var bottomControls: some View {
         HStack(spacing: 30) {
-            if viewModel.canToggleView {
-                Button {
-                    viewModel.toggleDisplayMode()
-                } label: {
-                    Label(
-                        viewModel.showingRenderedBarcode ? "Photo" : "Barcode",
-                        systemImage: viewModel.showingRenderedBarcode ? "photo" : "barcode"
-                    )
+            Button {
+                showDetail = true
+            } label: {
+                Label("Details", systemImage: "info.circle")
                     .font(.subheadline)
-                }
-                .tint(.white)
             }
+            .tint(.white)
         }
         .padding(.bottom, 30)
     }
@@ -81,10 +73,15 @@ struct FullScreenBarcodeView: View {
 
 struct SingleCardBarcodeContent: View {
     let card: Card
-    @Binding var showingRendered: Bool
 
-    private let barcodeGenerator: any BarcodeGeneratorServiceProtocol = BarcodeGeneratorService.shared
-    private let imageStorage: any ImageStorageServiceProtocol = ImageStorageService.shared
+    @State private var renderedBarcode: UIImage?
+    @State private var originalPhoto: UIImage?
+    @State private var showingRendered: Bool = true
+    @State private var hasLoaded = false
+
+    private var canToggle: Bool {
+        renderedBarcode != nil && originalPhoto != nil
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -92,8 +89,7 @@ struct SingleCardBarcodeContent: View {
                 .font(.headline)
                 .foregroundStyle(.white)
 
-            if showingRendered, card.barcodeFormat.canGenerate,
-               let rendered = generateBarcode() {
+            if showingRendered, let rendered = renderedBarcode {
                 Image(uiImage: rendered)
                     .resizable()
                     .interpolation(.none)
@@ -103,16 +99,22 @@ struct SingleCardBarcodeContent: View {
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
-            } else if let photo = loadPhoto() {
+            } else if let photo = originalPhoto {
                 Image(uiImage: photo)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
+            } else if !hasLoaded {
+                ProgressView()
+                    .tint(.white)
+                    .scaleEffect(1.5)
+                    .frame(height: 200)
             } else {
                 Image(systemName: "barcode")
                     .font(.system(size: 80))
                     .foregroundStyle(.gray)
+                    .frame(height: 200)
             }
 
             Text(card.barcodeData)
@@ -123,30 +125,64 @@ struct SingleCardBarcodeContent: View {
             Text(card.barcodeFormat.displayName)
                 .font(.caption2)
                 .foregroundStyle(.gray.opacity(0.7))
+
+            if canToggle {
+                Button {
+                    showingRendered.toggle()
+                } label: {
+                    Label(
+                        showingRendered ? "Show Photo" : "Show Barcode",
+                        systemImage: showingRendered ? "photo" : "barcode"
+                    )
+                    .font(.subheadline)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Capsule())
+                }
+                .tint(.white)
+            }
+        }
+        .task {
+            await loadImages()
         }
     }
 
-    private func generateBarcode() -> UIImage? {
-        let screenWidth = UIScreen.main.bounds.width
-        let scale = UIScreen.main.scale
-        let pixelWidth = screenWidth * scale
-        let size: CGSize
-        switch card.barcodeFormat {
-        case .qr, .aztec:
-            size = CGSize(width: pixelWidth, height: pixelWidth)
-        case .code128, .code39:
-            size = CGSize(width: pixelWidth, height: pixelWidth * 0.4)
-        case .pdf417:
-            size = CGSize(width: pixelWidth, height: pixelWidth * 0.3)
-        default:
-            size = CGSize(width: pixelWidth, height: pixelWidth)
-        }
-        return barcodeGenerator.generateBarcode(data: card.barcodeData, format: card.barcodeFormat, size: size)
-    }
+    private func loadImages() async {
+        let imageStorage = ImageStorageService.shared
+        let barcodeGenerator = BarcodeGeneratorService.shared
 
-    private func loadPhoto() -> UIImage? {
-        guard !card.imagePath.isEmpty else { return nil }
-        return imageStorage.loadImage(named: card.imagePath)
+        // Load original photo from disk (off main if possible)
+        if !card.imagePath.isEmpty {
+            originalPhoto = imageStorage.loadImage(named: card.imagePath)
+        }
+
+        // Generate rendered barcode if format supports it
+        if card.barcodeFormat.canGenerate {
+            let screenWidth = await MainActor.run { UIScreen.main.bounds.width }
+            let scale = await MainActor.run { UIScreen.main.scale }
+            let pixelWidth = screenWidth * scale
+            let size: CGSize
+            switch card.barcodeFormat {
+            case .qr, .aztec:
+                size = CGSize(width: pixelWidth, height: pixelWidth)
+            case .code128, .code39:
+                size = CGSize(width: pixelWidth, height: pixelWidth * 0.4)
+            case .pdf417:
+                size = CGSize(width: pixelWidth, height: pixelWidth * 0.3)
+            default:
+                size = CGSize(width: pixelWidth, height: pixelWidth)
+            }
+            renderedBarcode = barcodeGenerator.generateBarcode(
+                data: card.barcodeData,
+                format: card.barcodeFormat,
+                size: size
+            )
+        }
+
+        // Default to rendered if available, otherwise photo
+        showingRendered = renderedBarcode != nil
+        hasLoaded = true
     }
 }
 
@@ -158,5 +194,5 @@ struct SingleCardBarcodeContent: View {
             barcodeFormat: .code128
         ))
     }
-    .modelContainer(for: Card.self, inMemory: true)
+    .modelContainer(for: [Card.self, CardGroup.self], inMemory: true)
 }
