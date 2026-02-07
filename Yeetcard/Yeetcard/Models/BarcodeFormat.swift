@@ -43,9 +43,9 @@ enum BarcodeFormat: String, Codable, CaseIterable {
 
     var canGenerate: Bool {
         switch self {
-        case .qr, .code128, .pdf417, .aztec:
+        case .qr, .code128, .pdf417, .aztec, .code39, .ean13:
             return true
-        case .code39, .ean13, .ean8, .upcA, .upcE, .dataMatrix:
+        case .ean8, .upcA, .upcE, .dataMatrix:
             return false
         }
     }

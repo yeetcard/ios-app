@@ -143,7 +143,7 @@ struct BarcodeFormatTests {
     }
 
     @Test func canGenerateFormats() {
-        let expected: Set<BarcodeFormat> = [.qr, .code128, .pdf417, .aztec]
+        let expected: Set<BarcodeFormat> = [.qr, .code128, .pdf417, .aztec, .code39, .ean13]
         let actual = Set(BarcodeFormat.allCases.filter { $0.canGenerate })
         #expect(actual == expected)
     }
@@ -326,10 +326,31 @@ struct BarcodeGeneratorServiceTests {
         #expect(image != nil)
     }
 
+    @Test func generatesCode39() {
+        let image = service.generateBarcode(data: "HELLO", format: .code39)
+        #expect(image != nil)
+        #expect(image!.size.width > 0)
+        #expect(image!.size.height > 0)
+    }
+
+    @Test func generatesEAN13() {
+        let image = service.generateBarcode(data: "5901234123457", format: .ean13)
+        #expect(image != nil)
+        #expect(image!.size.width > 0)
+        #expect(image!.size.height > 0)
+    }
+
     @Test func returnsNilForNonGeneratableFormats() {
-        #expect(service.generateBarcode(data: "12345", format: .ean13) == nil)
-        #expect(service.generateBarcode(data: "12345", format: .code39) == nil)
         #expect(service.generateBarcode(data: "12345", format: .dataMatrix) == nil)
+    }
+
+    @Test func returnsNilForInvalidEAN13() {
+        #expect(service.generateBarcode(data: "12345", format: .ean13) == nil)
+        #expect(service.generateBarcode(data: "abcdefghijklm", format: .ean13) == nil)
+    }
+
+    @Test func returnsNilForInvalidCode39() {
+        #expect(service.generateBarcode(data: "invalid{char}", format: .code39) == nil)
     }
 
     @Test func respectsCustomSize() {
@@ -421,7 +442,7 @@ struct ManualEntryViewModelTests {
         for format in formats {
             #expect(format.canGenerate == true)
         }
-        #expect(formats.count == 4) // QR, Code128, PDF417, Aztec
+        #expect(formats.count == 6) // QR, Code128, PDF417, Aztec, Code39, EAN-13
     }
 
     @Test @MainActor func resetClearsAllFields() {
