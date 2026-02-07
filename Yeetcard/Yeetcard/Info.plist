@@ -8,6 +8,8 @@
 	<string>Yeetcard needs camera access to scan barcodes on your loyalty and membership cards.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Yeetcard uses Face ID to protect your cards from unauthorized access.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Yeetcard uses the microphone to detect beep sounds for auto-advancing cards in group view.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>

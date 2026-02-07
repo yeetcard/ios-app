@@ -110,6 +110,60 @@ final class MockCameraService: CameraServiceProtocol {
     }
 }
 
+final class MockAudioDetectionService: AudioDetectionServiceProtocol {
+    var isListening: Bool = false
+    var onSpikeDetected: (() -> Void)?
+
+    var startListeningCalled = false
+    var stopListeningCalled = false
+    var startListeningError: Error?
+
+    static var permissionResult: Bool = true
+
+    static func checkPermission() async -> Bool {
+        return permissionResult
+    }
+
+    func startListening() throws {
+        startListeningCalled = true
+        if let error = startListeningError {
+            throw error
+        }
+        isListening = true
+    }
+
+    func stopListening() {
+        stopListeningCalled = true
+        isListening = false
+    }
+
+    func simulateSpike() {
+        onSpikeDetected?()
+    }
+}
+
+final class MockTapDetectionService: TapDetectionServiceProtocol {
+    var isDetecting: Bool = false
+    var onTapDetected: (() -> Void)?
+
+    var startDetectingCalled = false
+    var stopDetectingCalled = false
+
+    func startDetecting() {
+        startDetectingCalled = true
+        isDetecting = true
+    }
+
+    func stopDetecting() {
+        stopDetectingCalled = true
+        isDetecting = false
+    }
+
+    func simulateTap() {
+        onTapDetected?()
+    }
+}
+
 final class MockPassKitService: PassKitServiceProtocol {
     var isWalletAvailable: Bool = true
     var shouldSucceed: Bool = false
@@ -1098,5 +1152,359 @@ struct ScannerViewModelTests {
 
         #expect(mock.setupSessionCalled)
         #expect(vm.state == .error("Camera is not available on this device"))
+    }
+}
+
+// MARK: - AudioDetectionService Tests
+
+@Suite("AudioDetectionService")
+struct AudioDetectionServiceTests {
+    @Test func initialStateIsNotListening() {
+        let service = AudioDetectionService()
+        #expect(service.isListening == false)
+        #expect(service.onSpikeDetected == nil)
+    }
+
+    @Test func stopWhenNotListeningDoesNotCrash() {
+        let service = AudioDetectionService()
+        service.stopListening()
+        #expect(service.isListening == false)
+    }
+}
+
+// MARK: - TapDetectionService Tests
+
+@Suite("TapDetectionService")
+struct TapDetectionServiceTests {
+    @Test func initialStateIsNotDetecting() {
+        let service = TapDetectionService()
+        #expect(service.isDetecting == false)
+        #expect(service.onTapDetected == nil)
+    }
+
+    @Test func stopWhenNotDetectingDoesNotCrash() {
+        let service = TapDetectionService()
+        service.stopDetecting()
+        #expect(service.isDetecting == false)
+    }
+}
+
+// MARK: - GroupBarcodeViewModel BeepTap Mode Tests
+
+@Suite("GroupBarcodeViewModel BeepTap Mode")
+struct GroupBarcodeViewModelBeepTapTests {
+
+    private func makeGroup(cardCount: Int) -> CardGroup {
+        let group = CardGroup(name: "Test Group")
+        for i in 0..<cardCount {
+            let card = Card(
+                name: "Card \(i)",
+                barcodeData: "data\(i)",
+                barcodeFormat: .qr,
+                dateAdded: Date().addingTimeInterval(Double(i))
+            )
+            card.group = group
+            group.cards.append(card)
+        }
+        return group
+    }
+
+    // MARK: - Ghost Page Helpers
+
+    @Test @MainActor func usesGhostPagesWhenMultipleCards() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+        #expect(vm.usesGhostPages == true)
+        #expect(vm.loopingPageCount == 5) // 3 + 2 ghost
+        #expect(vm.initialPage == 1)
+    }
+
+    @Test @MainActor func noGhostPagesForSingleCard() {
+        let group = makeGroup(cardCount: 1)
+        let vm = GroupBarcodeViewModel(group: group)
+        #expect(vm.usesGhostPages == false)
+        #expect(vm.loopingPageCount == 1)
+        #expect(vm.initialPage == 0)
+    }
+
+    @Test @MainActor func noGhostPagesForEmptyGroup() {
+        let group = makeGroup(cardCount: 0)
+        let vm = GroupBarcodeViewModel(group: group)
+        #expect(vm.usesGhostPages == false)
+        #expect(vm.loopingPageCount == 0)
+        #expect(vm.initialPage == 0)
+    }
+
+    @Test @MainActor func realCardIndexMapsCorrectly() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        // Ghost page 0 → last card (index 2)
+        #expect(vm.realCardIndex(for: 0) == 2)
+        // Real pages 1..3 → card indices 0..2
+        #expect(vm.realCardIndex(for: 1) == 0)
+        #expect(vm.realCardIndex(for: 2) == 1)
+        #expect(vm.realCardIndex(for: 3) == 2)
+        // Ghost page 4 → first card (index 0)
+        #expect(vm.realCardIndex(for: 4) == 0)
+    }
+
+    @Test @MainActor func cardForPageReturnsCorrectCard() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        #expect(vm.cardForPage(1)?.name == "Card 0")
+        #expect(vm.cardForPage(2)?.name == "Card 1")
+        #expect(vm.cardForPage(3)?.name == "Card 2")
+        // Ghost pages
+        #expect(vm.cardForPage(0)?.name == "Card 2")
+        #expect(vm.cardForPage(4)?.name == "Card 0")
+    }
+
+    @Test @MainActor func cardForPageReturnsNilForEmptyGroup() {
+        let group = makeGroup(cardCount: 0)
+        let vm = GroupBarcodeViewModel(group: group)
+        #expect(vm.cardForPage(0) == nil)
+    }
+
+    @Test @MainActor func displayCounterShowsCorrectValues() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        #expect(vm.displayCounter(for: 1) == "1 of 3")
+        #expect(vm.displayCounter(for: 2) == "2 of 3")
+        #expect(vm.displayCounter(for: 3) == "3 of 3")
+    }
+
+    @Test @MainActor func handlePageChangeSnapsBackFromGhostStart() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        // Page 0 is ghost-last → snap to page 3 (real last)
+        #expect(vm.handlePageChange(0) == 3)
+    }
+
+    @Test @MainActor func handlePageChangeSnapsBackFromGhostEnd() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        // Page 4 is ghost-first → snap to page 1 (real first)
+        #expect(vm.handlePageChange(4) == 1)
+    }
+
+    @Test @MainActor func handlePageChangeReturnsNilForRealPages() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        #expect(vm.handlePageChange(1) == nil)
+        #expect(vm.handlePageChange(2) == nil)
+        #expect(vm.handlePageChange(3) == nil)
+    }
+
+    @Test @MainActor func handlePageChangeReturnsNilWithoutGhostPages() {
+        let group = makeGroup(cardCount: 1)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        #expect(vm.handlePageChange(0) == nil)
+    }
+
+    // MARK: - Auto-Advance
+
+    @Test @MainActor func nextPageWrapsAround() {
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        #expect(vm.nextPage(from: 1) == 2)
+        #expect(vm.nextPage(from: 2) == 3)
+        #expect(vm.nextPage(from: 3) == 1) // loops back
+    }
+
+    @Test @MainActor func nextPageSingleCardStaysSame() {
+        let group = makeGroup(cardCount: 1)
+        let vm = GroupBarcodeViewModel(group: group)
+
+        #expect(vm.nextPage(from: 0) == 0)
+    }
+
+    // MARK: - Beep/Tap Mode Enable/Disable
+
+    @Test @MainActor func enableBeepTapModeStartsBothServices() async {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = true
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        await vm.enableBeepTapMode { }
+
+        #expect(vm.isBeepTapModeEnabled == true)
+        #expect(vm.isDetectionActive == true)
+        #expect(mockAudio.startListeningCalled == true)
+        #expect(mockTap.startDetectingCalled == true)
+    }
+
+    @Test @MainActor func enableBeepTapModePermissionDenied() async {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = false
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        await vm.enableBeepTapMode { }
+
+        #expect(vm.isBeepTapModeEnabled == false)
+        #expect(vm.microphonePermissionDenied == true)
+        #expect(mockAudio.startListeningCalled == false)
+        #expect(mockTap.startDetectingCalled == false)
+    }
+
+    @Test @MainActor func disableBeepTapModeStopsBothServices() async {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = true
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        await vm.enableBeepTapMode { }
+        vm.disableBeepTapMode()
+
+        #expect(vm.isBeepTapModeEnabled == false)
+        #expect(vm.isDetectionActive == false)
+        #expect(mockAudio.stopListeningCalled == true)
+        #expect(mockTap.stopDetectingCalled == true)
+    }
+
+    // MARK: - Detection Triggers Advance
+
+    @Test @MainActor func audioSpikeTriggersAdvance() async {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = true
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        var currentPage = 1
+        await vm.enableBeepTapMode {
+            currentPage = vm.nextPage(from: currentPage)
+        }
+
+        mockAudio.simulateSpike()
+        #expect(currentPage == 2)
+
+        mockAudio.simulateSpike()
+        #expect(currentPage == 3)
+
+        mockAudio.simulateSpike()
+        #expect(currentPage == 1) // looped
+    }
+
+    @Test @MainActor func tapDetectionTriggersAdvance() async {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = true
+
+        let group = makeGroup(cardCount: 2)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        var currentPage = 1
+        await vm.enableBeepTapMode {
+            currentPage = vm.nextPage(from: currentPage)
+        }
+
+        mockTap.simulateTap()
+        #expect(currentPage == 2)
+
+        mockTap.simulateTap()
+        #expect(currentPage == 1) // looped
+    }
+
+    // MARK: - Cleanup
+
+    @Test @MainActor func stopAllDetectionCleansUp() async {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = true
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        await vm.enableBeepTapMode { }
+        vm.stopAllDetection()
+
+        #expect(vm.isDetectionActive == false)
+        #expect(mockAudio.stopListeningCalled == true)
+        #expect(mockTap.stopDetectingCalled == true)
+    }
+
+    @Test @MainActor func stopAllDetectionNoopWhenNotActive() {
+        let mockAudio = MockAudioDetectionService()
+        let mockTap = MockTapDetectionService()
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        vm.stopAllDetection()
+
+        #expect(mockAudio.stopListeningCalled == false)
+        #expect(mockTap.stopDetectingCalled == false)
+    }
+
+    // MARK: - Audio Failure Degraded Mode
+
+    @Test @MainActor func audioFailureStillAllowsTapDetection() async {
+        let mockAudio = MockAudioDetectionService()
+        mockAudio.startListeningError = AudioDetectionError.audioEngineSetupFailed
+        let mockTap = MockTapDetectionService()
+        MockAudioDetectionService.permissionResult = true
+
+        let group = makeGroup(cardCount: 3)
+        let vm = GroupBarcodeViewModel(
+            group: group,
+            audioDetectionService: mockAudio,
+            tapDetectionService: mockTap
+        )
+
+        var currentPage = 1
+        await vm.enableBeepTapMode {
+            currentPage = vm.nextPage(from: currentPage)
+        }
+
+        #expect(vm.isBeepTapModeEnabled == true)
+        #expect(mockTap.startDetectingCalled == true)
+
+        mockTap.simulateTap()
+        #expect(currentPage == 2)
     }
 }
