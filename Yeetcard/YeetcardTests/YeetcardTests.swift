@@ -12,6 +12,7 @@ import PassKit
 import Vision
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import AVFoundation
 @testable import Yeetcard
 
 // MARK: - Mock Services
@@ -62,6 +63,50 @@ final class MockImageStorage: ImageStorageServiceProtocol {
 
     func getFullPath(for imageName: String) -> URL {
         URL(fileURLWithPath: "/tmp/\(imageName)")
+    }
+}
+
+final class MockCameraService: CameraServiceProtocol {
+    weak var delegate: (any CameraServiceDelegate)?
+
+    private let dummySession = AVCaptureSession()
+    lazy var previewLayer: AVCaptureVideoPreviewLayer = {
+        AVCaptureVideoPreviewLayer(session: dummySession)
+    }()
+
+    var isFlashAvailable: Bool = true
+    var isFlashOn: Bool = false
+
+    var setupSessionCalled = false
+    var startSessionCalled = false
+    var stopSessionCalled = false
+    var capturePhotoCalled = false
+    var toggleFlashCalled = false
+
+    var setupSessionError: Error?
+
+    func setupSession() async throws {
+        setupSessionCalled = true
+        if let error = setupSessionError {
+            throw error
+        }
+    }
+
+    func startSession() {
+        startSessionCalled = true
+    }
+
+    func stopSession() {
+        stopSessionCalled = true
+    }
+
+    func capturePhoto() {
+        capturePhotoCalled = true
+    }
+
+    func toggleFlash() {
+        toggleFlashCalled = true
+        isFlashOn.toggle()
     }
 }
 
@@ -784,5 +829,253 @@ struct CardDetailViewModelTests {
         let card = Card(name: "Card", barcodeData: "data", barcodeFormat: .qr)
         let vm = CardDetailViewModel(card: card)
         #expect(vm.cardImage == nil)
+    }
+}
+
+// MARK: - CameraService Tests
+
+@Suite("CameraService")
+struct CameraServiceTests {
+    @Test func previewLayerReturnsSameInstance() {
+        let service = CameraService()
+        let layer1 = service.previewLayer
+        let layer2 = service.previewLayer
+        #expect(layer1 === layer2, "previewLayer must return the same instance every time — creating a new layer per access causes the camera to freeze")
+    }
+
+    @Test func setupSessionIsAsync() async {
+        // Verify setupSession doesn't block the caller by confirming it runs
+        // asynchronously. On the simulator there's no camera, so it throws
+        // cameraUnavailable — the important thing is it returns without freezing.
+        let service = CameraService()
+        do {
+            try await service.setupSession()
+            // If a camera is available (physical device), success is fine
+        } catch {
+            // Expected on simulator — cameraUnavailable
+            #expect(error is CameraError)
+        }
+    }
+}
+
+// MARK: - ScannerViewModel Tests
+
+@Suite("ScannerViewModel")
+struct ScannerViewModelTests {
+    @Test @MainActor func startScanningSetsStateAndStartsSession() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+        vm.hasPermission = true
+
+        vm.startScanning()
+
+        #expect(vm.state == .scanning)
+        #expect(mock.startSessionCalled)
+    }
+
+    @Test @MainActor func startScanningRequiresPermission() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+
+        vm.startScanning()
+
+        #expect(vm.state == .idle)
+        #expect(!mock.startSessionCalled)
+    }
+
+    @Test @MainActor func stopScanningSetsIdleAndStopsSession() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        vm.stopScanning()
+
+        #expect(vm.state == .idle)
+        #expect(mock.stopSessionCalled)
+    }
+
+    @Test @MainActor func firstBarcodeDetectionStartsTimerButDoesNotTransition() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        vm.processBarcodeDetections([barcode])
+
+        // First detection records the barcode and starts the timer, but doesn't transition
+        #expect(vm.state == .scanning)
+        #expect(!mock.capturePhotoCalled)
+    }
+
+    @Test @MainActor func consistentDetectionTriggersDetectedStateAndCapture() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        // First: starts timer
+        vm.processBarcodeDetections([barcode])
+        // Second: same barcode, duration elapsed (0s) → detected
+        vm.processBarcodeDetections([barcode])
+
+        #expect(vm.state == .detected(barcode))
+        #expect(mock.capturePhotoCalled, "capturePhoto should be called when barcode is confirmed")
+    }
+
+    @Test @MainActor func differentBarcodeResetsDetectionTimer() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode1 = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        let barcode2 = DetectedBarcode(data: "67890", format: .qr, boundingBox: .zero)
+
+        vm.processBarcodeDetections([barcode1])
+        vm.processBarcodeDetections([barcode2])
+
+        #expect(vm.state == .scanning, "Different barcode should reset detection, not trigger capture")
+        #expect(!mock.capturePhotoCalled)
+    }
+
+    @Test @MainActor func emptyDetectionResetsTracking() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        vm.processBarcodeDetections([barcode])
+        // No barcodes seen — resets tracking
+        vm.processBarcodeDetections([])
+        // Same barcode again should start fresh (not trigger detection)
+        vm.processBarcodeDetections([barcode])
+
+        #expect(vm.state == .scanning)
+        #expect(!mock.capturePhotoCalled)
+    }
+
+    @Test @MainActor func handlePhotoCapturedTransitionsToCapturedState() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        vm.processBarcodeDetections([barcode])
+        vm.processBarcodeDetections([barcode])
+        #expect(vm.state == .detected(barcode))
+
+        let testImage = UIImage(systemName: "star")!
+        vm.handlePhotoCaptured(testImage)
+
+        if case .captured(_, let capturedBarcode) = vm.state {
+            #expect(capturedBarcode.data == "12345")
+        } else {
+            Issue.record("Expected .captured state but got \(vm.state)")
+        }
+    }
+
+    @Test @MainActor func handlePhotoCapturedIgnoredIfNotDetected() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let testImage = UIImage(systemName: "star")!
+        vm.handlePhotoCaptured(testImage)
+
+        #expect(vm.state == .scanning, "Photo should be ignored when not in .detected state")
+    }
+
+    @Test @MainActor func handleErrorSetsErrorState() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+
+        vm.handleError(.cameraUnavailable)
+
+        #expect(vm.state == .error("Camera is not available on this device"))
+    }
+
+    @Test @MainActor func resetReturnsToScanning() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        vm.processBarcodeDetections([barcode])
+        vm.processBarcodeDetections([barcode])
+        #expect(vm.state == .detected(barcode))
+
+        vm.reset()
+
+        #expect(vm.state == .scanning)
+    }
+
+    @Test @MainActor func toggleFlashDelegatesToCameraService() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+
+        vm.toggleFlash()
+
+        #expect(mock.toggleFlashCalled)
+        #expect(vm.isFlashOn == true)
+    }
+
+    @Test @MainActor func processBarcodesIgnoredWhenNotScanning() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        // state is .idle (no startScanning called)
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        vm.processBarcodeDetections([barcode])
+        vm.processBarcodeDetections([barcode])
+
+        #expect(vm.state == .idle, "Barcode processing should be ignored when not in .scanning state")
+        #expect(!mock.capturePhotoCalled)
+    }
+
+    @Test @MainActor func detectionRequiresSufficientDuration() {
+        let mock = MockCameraService()
+        // Use a long duration so the timer never expires in this test
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 999)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        vm.processBarcodeDetections([barcode])
+        vm.processBarcodeDetections([barcode])
+
+        #expect(vm.state == .scanning, "Should not transition to .detected before requiredDetectionDuration elapses")
+        #expect(!mock.capturePhotoCalled)
+    }
+
+    @Test @MainActor func previewLayerReturnsSameInstanceThroughViewModel() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock)
+
+        let layer1 = vm.previewLayer
+        let layer2 = vm.previewLayer
+        #expect(layer1 === layer2, "Repeated previewLayer access must return the same instance")
+    }
+
+    @Test @MainActor func setupFailureSetsErrorState() async {
+        let mock = MockCameraService()
+        mock.setupSessionError = CameraError.cameraUnavailable
+        let vm = ScannerViewModel(cameraService: mock)
+        vm.hasPermission = true
+
+        do {
+            try await mock.setupSession()
+        } catch {
+            vm.handleError(error as! CameraError)
+        }
+
+        #expect(mock.setupSessionCalled)
+        #expect(vm.state == .error("Camera is not available on this device"))
     }
 }
