@@ -8,5 +8,7 @@
 	<string>Yeetcard needs camera access to scan barcodes on your loyalty and membership cards.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Yeetcard uses Face ID to protect your cards from unauthorized access.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
