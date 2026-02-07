@@ -11,8 +11,8 @@ import PassKit
 @Observable
 final class CardDetailViewModel {
     private var cardDataService: CardDataService?
-    private let passKitService = PassKitService.shared
-    private let imageStorage = ImageStorageService.shared
+    private let passKitService: any PassKitServiceProtocol
+    private let imageStorage: any ImageStorageServiceProtocol
 
     var card: Card
     var isEditing: Bool = false
@@ -32,8 +32,10 @@ final class CardDetailViewModel {
         card.isWalletCompatible && !card.isInWallet && passKitService.isWalletAvailable
     }
 
-    init(card: Card) {
+    init(card: Card, passKitService: any PassKitServiceProtocol = PassKitService.shared, imageStorage: any ImageStorageServiceProtocol = ImageStorageService.shared) {
         self.card = card
+        self.passKitService = passKitService
+        self.imageStorage = imageStorage
         self.editedName = card.name
         self.editedNotes = card.notes
     }

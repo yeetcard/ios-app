@@ -40,7 +40,19 @@ struct PassRequest: Codable {
     let backgroundColor: String
 }
 
-final class PassKitService {
+protocol PassKitServiceProtocol {
+    var isWalletAvailable: Bool { get }
+    func createPass(for card: Card, foregroundColor: String, backgroundColor: String) async throws -> PKPass
+    func isCardInWallet(card: Card) -> Bool
+}
+
+extension PassKitServiceProtocol {
+    func createPass(for card: Card) async throws -> PKPass {
+        try await createPass(for: card, foregroundColor: "#FFFFFF", backgroundColor: "#1A1A2E")
+    }
+}
+
+final class PassKitService: PassKitServiceProtocol {
     static let shared = PassKitService()
 
     private let baseURL: URL

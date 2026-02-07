@@ -36,7 +36,13 @@ enum AuthenticationError: Error, LocalizedError {
     }
 }
 
-final class AuthenticationService {
+protocol AuthenticationServiceProtocol {
+    var availableBiometricType: BiometricType { get }
+    var isBiometricsAvailable: Bool { get }
+    func authenticate() async throws
+}
+
+final class AuthenticationService: AuthenticationServiceProtocol {
     static let shared = AuthenticationService()
 
     private init() {}
