@@ -10,7 +10,11 @@ import SwiftData
 @Observable
 final class ManualEntryViewModel {
     private var cardDataService: CardDataService?
-    private let barcodeGenerator = BarcodeGeneratorService.shared
+    private let barcodeGenerator: any BarcodeGeneratorServiceProtocol
+
+    init(barcodeGenerator: any BarcodeGeneratorServiceProtocol = BarcodeGeneratorService.shared) {
+        self.barcodeGenerator = barcodeGenerator
+    }
 
     var cardName: String = ""
     var barcodeData: String = ""

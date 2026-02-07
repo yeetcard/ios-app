@@ -7,7 +7,18 @@ import UIKit
 import CoreImage
 import CoreImage.CIFilterBuiltins
 
-final class BarcodeGeneratorService {
+protocol BarcodeGeneratorServiceProtocol {
+    func generateBarcode(data: String, format: BarcodeFormat, size: CGSize) -> UIImage?
+    func validateBarcodeData(_ data: String, for format: BarcodeFormat) -> Bool
+}
+
+extension BarcodeGeneratorServiceProtocol {
+    func generateBarcode(data: String, format: BarcodeFormat) -> UIImage? {
+        generateBarcode(data: data, format: format, size: CGSize(width: 300, height: 300))
+    }
+}
+
+final class BarcodeGeneratorService: BarcodeGeneratorServiceProtocol {
     static let shared = BarcodeGeneratorService()
 
     private let context = CIContext()

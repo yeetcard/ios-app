@@ -13,7 +13,11 @@ struct DetectedBarcode {
     let boundingBox: CGRect
 }
 
-final class BarcodeDetectionService {
+protocol BarcodeDetectionServiceProtocol {
+    func detectBarcodes(in image: UIImage) async -> [DetectedBarcode]
+}
+
+final class BarcodeDetectionService: BarcodeDetectionServiceProtocol {
     private let supportedSymbologies: [VNBarcodeSymbology] = [
         .qr,
         .code128,

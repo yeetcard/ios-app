@@ -8,7 +8,11 @@ import SwiftUI
 @MainActor
 @Observable
 final class AuthenticationViewModel {
-    private let authService = AuthenticationService.shared
+    private let authService: any AuthenticationServiceProtocol
+
+    init(authService: any AuthenticationServiceProtocol = AuthenticationService.shared) {
+        self.authService = authService
+    }
 
     var isAuthenticated: Bool = false
     var isAuthenticating: Bool = false

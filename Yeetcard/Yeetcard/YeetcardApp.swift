@@ -35,6 +35,11 @@ struct YeetcardApp: App {
                     AuthenticationOverlayContainer(isAuthenticated: $isAuthenticated)
                 }
             }
+            .onChange(of: isAuthenticated) { _, newValue in
+                if newValue {
+                    needsAuthentication = false
+                }
+            }
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
                 case .active:

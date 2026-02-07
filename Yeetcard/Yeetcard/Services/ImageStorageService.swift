@@ -5,7 +5,14 @@
 
 import UIKit
 
-final class ImageStorageService {
+protocol ImageStorageServiceProtocol {
+    func saveImage(_ image: UIImage, cardId: UUID) -> (imagePath: String, thumbnailPath: String)?
+    func loadImage(named name: String) -> UIImage?
+    func deleteImages(imagePath: String, thumbnailPath: String)
+    func getFullPath(for imageName: String) -> URL
+}
+
+final class ImageStorageService: ImageStorageServiceProtocol {
     static let shared = ImageStorageService()
 
     private let fileManager = FileManager.default
