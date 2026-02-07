@@ -134,7 +134,7 @@ struct SingleCardBarcodeContent: View {
         switch card.barcodeFormat {
         case .qr, .aztec:
             size = CGSize(width: pixelWidth, height: pixelWidth)
-        case .code128, .code39:
+        case .code128, .code39, .ean13:
             size = CGSize(width: pixelWidth, height: pixelWidth * 0.4)
         case .pdf417:
             size = CGSize(width: pixelWidth, height: pixelWidth * 0.3)

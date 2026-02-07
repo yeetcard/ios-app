@@ -67,7 +67,7 @@ final class FullScreenBarcodeViewModel {
         switch format {
         case .qr, .aztec:
             return CGSize(width: pixelWidth, height: pixelWidth)
-        case .code128, .code39:
+        case .code128, .code39, .ean13:
             return CGSize(width: pixelWidth, height: pixelWidth * 0.4)
         case .pdf417:
             return CGSize(width: pixelWidth, height: pixelWidth * 0.3)
