@@ -5,6 +5,16 @@
 
 import AVFoundation
 
+struct AudioDebugInfo {
+    var rms: Float = 0.0
+    var previousRMS: Float = 0.0
+    var spikeThreshold: Float = 0.0
+    var quietThreshold: Float = 0.0
+    var debounceInterval: TimeInterval = 0.0
+    var timeSinceLastTrigger: TimeInterval = .infinity
+    var triggered: Bool = false
+}
+
 enum AudioDetectionError: Error, LocalizedError {
     case microphonePermissionDenied
     case audioEngineSetupFailed
@@ -22,6 +32,7 @@ enum AudioDetectionError: Error, LocalizedError {
 protocol AudioDetectionServiceProtocol: AnyObject {
     var isListening: Bool { get }
     var onSpikeDetected: (() -> Void)? { get set }
+    var onDebugUpdate: ((AudioDebugInfo) -> Void)? { get set }
     func startListening() throws
     func stopListening()
     static func checkPermission() async -> Bool
@@ -30,10 +41,12 @@ protocol AudioDetectionServiceProtocol: AnyObject {
 final class AudioDetectionService: AudioDetectionServiceProtocol {
     var isListening: Bool = false
     var onSpikeDetected: (() -> Void)?
+    var onDebugUpdate: ((AudioDebugInfo) -> Void)?
 
     private let audioEngine = AVAudioEngine()
     private var previousRMS: Float = 0.0
     private var lastTriggerTime: Date = .distantPast
+    private var lastDebugTime: Date = .distantPast
 
     private let spikeThreshold: Float = 0.15
     private let quietThreshold: Float = 0.05
@@ -94,16 +107,37 @@ final class AudioDetectionService: AudioDetectionServiceProtocol {
         }
         let rms = sqrt(sum / Float(frameLength))
 
+        var triggered = false
         if rms > spikeThreshold && previousRMS < quietThreshold {
             let now = Date()
             if now.timeIntervalSince(lastTriggerTime) >= debounceInterval {
                 lastTriggerTime = now
+                triggered = true
                 let callback = onSpikeDetected
                 DispatchQueue.main.async {
                     callback?()
                 }
             }
         }
+
+        let now = Date()
+        if triggered || now.timeIntervalSince(lastDebugTime) >= 0.1 {
+            lastDebugTime = now
+            let info = AudioDebugInfo(
+                rms: rms,
+                previousRMS: previousRMS,
+                spikeThreshold: spikeThreshold,
+                quietThreshold: quietThreshold,
+                debounceInterval: debounceInterval,
+                timeSinceLastTrigger: now.timeIntervalSince(lastTriggerTime),
+                triggered: triggered
+            )
+            let debugCallback = onDebugUpdate
+            DispatchQueue.main.async {
+                debugCallback?(info)
+            }
+        }
+
         previousRMS = rms
     }
 }

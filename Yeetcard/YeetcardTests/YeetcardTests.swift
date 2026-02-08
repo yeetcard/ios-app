@@ -113,6 +113,7 @@ final class MockCameraService: CameraServiceProtocol {
 final class MockAudioDetectionService: AudioDetectionServiceProtocol {
     var isListening: Bool = false
     var onSpikeDetected: (() -> Void)?
+    var onDebugUpdate: ((AudioDebugInfo) -> Void)?
 
     var startListeningCalled = false
     var stopListeningCalled = false
