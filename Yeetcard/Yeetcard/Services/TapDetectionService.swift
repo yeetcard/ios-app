@@ -21,9 +21,9 @@ final class TapDetectionService: TapDetectionServiceProtocol {
     private var lastTriggerTime: Date = .distantPast
     private var previousMagnitude: Double = 0.0
 
-    private let spikeThreshold: Double = 1.8
-    private let quietThreshold: Double = 1.2
-    private let debounceInterval: TimeInterval = 1.0
+    private let spikeThreshold: Double = 1.4
+    private let quietThreshold: Double = 1.15
+    private let debounceInterval: TimeInterval = 0.8
 
     init() {
         motionQueue.name = "com.yeetcard.tapdetection"
