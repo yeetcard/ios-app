@@ -42,8 +42,8 @@ struct GroupBarcodeView: View {
                 }
             }
 
-            if let debug = viewModel.tapDebugInfo {
-                tapDebugOverlay(debug)
+            if let tapDebug = viewModel.tapDebugInfo, let audioDebug = viewModel.audioDebugInfo {
+                debugOverlay(tap: tapDebug, audio: audioDebug)
             }
         }
         .navigationTitle(viewModel.group.name)
@@ -186,42 +186,31 @@ struct GroupBarcodeView: View {
         .padding(.bottom, 30)
     }
 
-    // MARK: - Tap Debug Overlay
+    // MARK: - Debug Overlay
 
-    private func tapDebugOverlay(_ info: TapDebugInfo) -> some View {
+    private func debugOverlay(tap: TapDebugInfo, audio: AudioDebugInfo) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            debugRow("magnitude", value: info.magnitude, threshold: info.spikeThreshold, aboveIsBad: true)
-            debugRow("prev mag", value: info.previousMagnitude, threshold: info.quietThreshold, aboveIsBad: false)
-            HStack(spacing: 8) {
-                Text("spike thresh")
-                    .foregroundStyle(.gray)
-                Spacer()
-                Text(String(format: "%.3f", info.spikeThreshold))
-                    .foregroundStyle(.white)
-            }
-            HStack(spacing: 8) {
-                Text("quiet thresh")
-                    .foregroundStyle(.gray)
-                Spacer()
-                Text(String(format: "%.3f", info.quietThreshold))
-                    .foregroundStyle(.white)
-            }
-            HStack(spacing: 8) {
-                Text("debounce")
-                    .foregroundStyle(.gray)
-                Spacer()
-                Text(String(format: "%.2fs", info.debounceInterval))
-                    .foregroundStyle(.white)
-            }
-            HStack(spacing: 8) {
-                Text("since trigger")
-                    .foregroundStyle(.gray)
-                Spacer()
-                Text(info.timeSinceLastTrigger > 99 ? "---" : String(format: "%.2fs", info.timeSinceLastTrigger))
-                    .foregroundStyle(info.timeSinceLastTrigger < info.debounceInterval ? .red : .white)
-            }
-            if info.triggered {
+            Text("TAP")
+                .foregroundStyle(.yellow)
+            debugRow("magnitude", value: tap.magnitude, threshold: tap.spikeThreshold, aboveIsBad: true)
+            debugRow("prev mag", value: tap.previousMagnitude, threshold: tap.quietThreshold, aboveIsBad: false)
+            debugThresholds(spike: tap.spikeThreshold, quiet: tap.quietThreshold, debounce: tap.debounceInterval, timeSince: tap.timeSinceLastTrigger)
+            if tap.triggered {
                 Text("TAP!")
+                    .font(.system(.caption, design: .monospaced).bold())
+                    .foregroundStyle(.green)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+
+            Divider().background(.gray)
+
+            Text("AUDIO")
+                .foregroundStyle(.yellow)
+            debugRow("rms", value: Double(audio.rms), threshold: Double(audio.spikeThreshold), aboveIsBad: true)
+            debugRow("prev rms", value: Double(audio.previousRMS), threshold: Double(audio.quietThreshold), aboveIsBad: false)
+            debugThresholds(spike: Double(audio.spikeThreshold), quiet: Double(audio.quietThreshold), debounce: audio.debounceInterval, timeSince: audio.timeSinceLastTrigger)
+            if audio.triggered {
+                Text("BEEP!")
                     .font(.system(.caption, design: .monospaced).bold())
                     .foregroundStyle(.green)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -237,8 +226,40 @@ struct GroupBarcodeView: View {
         .allowsHitTesting(false)
     }
 
+    private func debugThresholds(spike: Double, quiet: Double, debounce: TimeInterval, timeSince: TimeInterval) -> some View {
+        Group {
+            HStack(spacing: 8) {
+                Text("spike thresh")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(String(format: "%.3f", spike))
+                    .foregroundStyle(.white)
+            }
+            HStack(spacing: 8) {
+                Text("quiet thresh")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(String(format: "%.3f", quiet))
+                    .foregroundStyle(.white)
+            }
+            HStack(spacing: 8) {
+                Text("debounce")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(String(format: "%.2fs", debounce))
+                    .foregroundStyle(.white)
+            }
+            HStack(spacing: 8) {
+                Text("since trigger")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(timeSince > 99 ? "---" : String(format: "%.2fs", timeSince))
+                    .foregroundStyle(timeSince < debounce ? .red : .white)
+            }
+        }
+    }
+
     private func debugRow(_ label: String, value: Double, threshold: Double, aboveIsBad: Bool) -> some View {
-        // Scale: bar goes from 0 to 2x threshold
         let maxVal = threshold * 2.0
         let valueFrac = min(value / max(maxVal, 0.001), 1.0)
         let threshFrac = threshold / max(maxVal, 0.001)
@@ -258,7 +279,6 @@ struct GroupBarcodeView: View {
                     Rectangle()
                         .fill(color.opacity(0.6))
                         .frame(width: geo.size.width * CGFloat(valueFrac))
-                    // threshold marker
                     Rectangle()
                         .fill(.yellow)
                         .frame(width: 1)

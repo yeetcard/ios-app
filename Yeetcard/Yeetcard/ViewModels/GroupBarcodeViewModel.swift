@@ -19,6 +19,7 @@ final class GroupBarcodeViewModel {
     var microphonePermissionDenied: Bool = false
     var isDetectionActive: Bool = false
     var tapDebugInfo: TapDebugInfo?
+    var audioDebugInfo: AudioDebugInfo?
 
     var cards: [Card] {
         group.sortedCards
@@ -123,6 +124,9 @@ final class GroupBarcodeViewModel {
         }
 
         audioDetectionService.onSpikeDetected = advanceAction
+        audioDetectionService.onDebugUpdate = { [weak self] info in
+            self?.audioDebugInfo = info
+        }
         tapDetectionService.onTapDetected = advanceAction
         tapDetectionService.onDebugUpdate = { [weak self] info in
             self?.tapDebugInfo = info
@@ -143,9 +147,11 @@ final class GroupBarcodeViewModel {
         audioDetectionService.stopListening()
         tapDetectionService.stopDetecting()
         audioDetectionService.onSpikeDetected = nil
+        audioDetectionService.onDebugUpdate = nil
         tapDetectionService.onTapDetected = nil
         tapDetectionService.onDebugUpdate = nil
         tapDebugInfo = nil
+        audioDebugInfo = nil
         isDetectionActive = false
         isBeepTapModeEnabled = false
     }
