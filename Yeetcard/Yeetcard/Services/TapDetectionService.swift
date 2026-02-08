@@ -19,8 +19,10 @@ final class TapDetectionService: TapDetectionServiceProtocol {
     private let motionManager = CMMotionManager()
     private let motionQueue = OperationQueue()
     private var lastTriggerTime: Date = .distantPast
+    private var previousMagnitude: Double = 0.0
 
-    private let accelerationThreshold: Double = 2.5
+    private let spikeThreshold: Double = 1.8
+    private let quietThreshold: Double = 1.2
     private let debounceInterval: TimeInterval = 1.0
 
     init() {
@@ -43,6 +45,7 @@ final class TapDetectionService: TapDetectionServiceProtocol {
         guard isDetecting else { return }
         motionManager.stopAccelerometerUpdates()
         isDetecting = false
+        previousMagnitude = 0.0
     }
 
     private func processAccelerometerData(_ data: CMAccelerometerData) {
@@ -53,7 +56,7 @@ final class TapDetectionService: TapDetectionServiceProtocol {
             acceleration.z * acceleration.z
         )
 
-        if magnitude > accelerationThreshold {
+        if magnitude > spikeThreshold && previousMagnitude < quietThreshold {
             let now = Date()
             if now.timeIntervalSince(lastTriggerTime) >= debounceInterval {
                 lastTriggerTime = now
@@ -63,5 +66,6 @@ final class TapDetectionService: TapDetectionServiceProtocol {
                 }
             }
         }
+        previousMagnitude = magnitude
     }
 }
