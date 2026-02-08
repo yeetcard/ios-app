@@ -145,6 +145,7 @@ final class MockAudioDetectionService: AudioDetectionServiceProtocol {
 final class MockTapDetectionService: TapDetectionServiceProtocol {
     var isDetecting: Bool = false
     var onTapDetected: (() -> Void)?
+    var onDebugUpdate: ((TapDebugInfo) -> Void)?
 
     var startDetectingCalled = false
     var stopDetectingCalled = false

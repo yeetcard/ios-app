@@ -41,6 +41,10 @@ struct GroupBarcodeView: View {
                     bottomControls
                 }
             }
+
+            if let debug = viewModel.tapDebugInfo {
+                tapDebugOverlay(debug)
+            }
         }
         .navigationTitle(viewModel.group.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -180,6 +184,90 @@ struct GroupBarcodeView: View {
             }
         }
         .padding(.bottom, 30)
+    }
+
+    // MARK: - Tap Debug Overlay
+
+    private func tapDebugOverlay(_ info: TapDebugInfo) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            debugRow("magnitude", value: info.magnitude, threshold: info.spikeThreshold, aboveIsBad: true)
+            debugRow("prev mag", value: info.previousMagnitude, threshold: info.quietThreshold, aboveIsBad: false)
+            HStack(spacing: 8) {
+                Text("spike thresh")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(String(format: "%.3f", info.spikeThreshold))
+                    .foregroundStyle(.white)
+            }
+            HStack(spacing: 8) {
+                Text("quiet thresh")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(String(format: "%.3f", info.quietThreshold))
+                    .foregroundStyle(.white)
+            }
+            HStack(spacing: 8) {
+                Text("debounce")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(String(format: "%.2fs", info.debounceInterval))
+                    .foregroundStyle(.white)
+            }
+            HStack(spacing: 8) {
+                Text("since trigger")
+                    .foregroundStyle(.gray)
+                Spacer()
+                Text(info.timeSinceLastTrigger > 99 ? "---" : String(format: "%.2fs", info.timeSinceLastTrigger))
+                    .foregroundStyle(info.timeSinceLastTrigger < info.debounceInterval ? .red : .white)
+            }
+            if info.triggered {
+                Text("TAP!")
+                    .font(.system(.caption, design: .monospaced).bold())
+                    .foregroundStyle(.green)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+        .font(.system(.caption2, design: .monospaced))
+        .padding(10)
+        .background(.black.opacity(0.75))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        .padding(.bottom, 80)
+        .allowsHitTesting(false)
+    }
+
+    private func debugRow(_ label: String, value: Double, threshold: Double, aboveIsBad: Bool) -> some View {
+        // Scale: bar goes from 0 to 2x threshold
+        let maxVal = threshold * 2.0
+        let valueFrac = min(value / max(maxVal, 0.001), 1.0)
+        let threshFrac = threshold / max(maxVal, 0.001)
+        let color: Color = aboveIsBad
+            ? (value > threshold ? .green : .white)
+            : (value < threshold ? .green : .orange)
+        return HStack(spacing: 8) {
+            Text(label)
+                .foregroundStyle(.gray)
+            Spacer()
+            Text(String(format: "%.3f", value))
+                .foregroundStyle(color)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                    Rectangle()
+                        .fill(color.opacity(0.6))
+                        .frame(width: geo.size.width * CGFloat(valueFrac))
+                    // threshold marker
+                    Rectangle()
+                        .fill(.yellow)
+                        .frame(width: 1)
+                        .offset(x: geo.size.width * CGFloat(threshFrac))
+                }
+            }
+            .frame(width: 80, height: 10)
+            .clipShape(RoundedRectangle(cornerRadius: 2))
+        }
     }
 
     // MARK: - Toggle Beep/Tap Mode
