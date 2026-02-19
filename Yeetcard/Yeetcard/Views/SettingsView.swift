@@ -9,6 +9,7 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = SettingsViewModel()
+    @AppStorage("showDebugOverlay") private var showDebugOverlay = false
 
     var body: some View {
         NavigationStack {
@@ -38,6 +39,19 @@ struct SettingsView: View {
                     .disabled(viewModel.cardCount == 0)
                 }
 
+                Section {
+                    Toggle(isOn: $showDebugOverlay) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Show Debug Overlay")
+                            Text("Shows real-time detection data when auto-advance is active")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Developer")
+                }
+
                 Section("About") {
                     HStack {
                         Text("Version")
@@ -46,15 +60,15 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Link(destination: URL(string: "mailto:support@yeetcard.app")!) {
+                    Link(destination: URL(string: "mailto:support@yeetcard.rocks")!) {
                         Label("Contact Support", systemImage: "envelope")
                     }
 
-                    Link(destination: URL(string: "https://yeetcard.app/privacy")!) {
+                    Link(destination: URL(string: "https://yeetcard.rocks/privacy")!) {
                         Label("Privacy Policy", systemImage: "hand.raised")
                     }
 
-                    Link(destination: URL(string: "https://yeetcard.app/terms")!) {
+                    Link(destination: URL(string: "https://yeetcard.rocks/terms")!) {
                         Label("Terms of Service", systemImage: "doc.text")
                     }
                 }

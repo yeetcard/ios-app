@@ -14,6 +14,7 @@ struct GroupBarcodeView: View {
     @State private var showDetail = false
     @State private var cardShowingRendered: [UUID: Bool] = [:]
     @State private var showMicPermissionAlert = false
+    @AppStorage("showDebugOverlay") private var showDebugOverlay = false
 
     init(group: CardGroup) {
         let vm = GroupBarcodeViewModel(group: group)
@@ -42,7 +43,7 @@ struct GroupBarcodeView: View {
                 }
             }
 
-            if let tapDebug = viewModel.tapDebugInfo, let audioDebug = viewModel.audioDebugInfo {
+            if showDebugOverlay, let tapDebug = viewModel.tapDebugInfo, let audioDebug = viewModel.audioDebugInfo {
                 debugOverlay(tap: tapDebug, audio: audioDebug)
             }
         }

@@ -22,9 +22,6 @@ struct CardDetailView: View {
 
                 cardInfoSection
 
-                if viewModel.canAddToWallet {
-                    walletSection
-                }
 
                 if !viewModel.card.notes.isEmpty || viewModel.isEditing {
                     notesSection
