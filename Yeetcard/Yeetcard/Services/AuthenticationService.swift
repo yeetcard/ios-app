@@ -93,7 +93,10 @@ final class AuthenticationService: AuthenticationServiceProtocol {
         let reason = "Unlock Yeetcard to access your cards"
 
         do {
-            let success = try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
+            // Use .deviceOwnerAuthentication (not ...WithBiometrics) so the system
+            // offers a device-passcode fallback if biometrics fail — otherwise a
+            // failed Face ID scan would lock the user out of their own cards.
+            let success = try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
 
             if !success {
                 throw AuthenticationError.authenticationFailed
