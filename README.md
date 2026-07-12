@@ -154,5 +154,5 @@ NSFaceIDUsageDescription: "Yeetcard uses Face ID to keep your cards secure"
 - **Price:** Free
 - **Category:** Utilities or Productivity
 - **Privacy:** Camera, Photos/Videos, User Content — all local, not linked to user, not used for tracking
-- **Support:** support@[domain].com
-- **Legal:** Privacy Policy and Terms of Service hosted at [domain].com
+- **Support:** GitHub Issues (https://github.com/yeetcard/ios-app/issues)
+- **Legal:** Privacy Policy and Terms of Service hosted via GitHub Pages (https://yeetcard.github.io/ios-app/)

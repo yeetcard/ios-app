@@ -60,15 +60,15 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Link(destination: URL(string: "mailto:support@yeetcard.rocks")!) {
-                        Label("Contact Support", systemImage: "envelope")
+                    Link(destination: URL(string: "https://github.com/yeetcard/ios-app/issues")!) {
+                        Label("Support", systemImage: "questionmark.circle")
                     }
 
-                    Link(destination: URL(string: "https://yeetcard.rocks/privacy")!) {
+                    Link(destination: URL(string: "https://yeetcard.github.io/ios-app/privacy/")!) {
                         Label("Privacy Policy", systemImage: "hand.raised")
                     }
 
-                    Link(destination: URL(string: "https://yeetcard.rocks/terms")!) {
+                    Link(destination: URL(string: "https://yeetcard.github.io/ios-app/terms/")!) {
                         Label("Terms of Service", systemImage: "doc.text")
                     }
                 }
