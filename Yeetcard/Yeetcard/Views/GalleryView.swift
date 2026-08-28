@@ -205,14 +205,19 @@ struct CardGridItem: View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack {
                 if let image = loadThumbnail() {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                    Color.clear
+                        .frame(maxWidth: .infinity)
                         .frame(height: 120)
+                        .overlay {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        }
                         .clipped()
                 } else {
                     Rectangle()
                         .fill(Color.secondary.opacity(0.2))
+                        .frame(maxWidth: .infinity)
                         .frame(height: 120)
                         .overlay {
                             Image(systemName: "barcode")
@@ -285,10 +290,14 @@ struct GroupGridItem: View {
 
                 // Front card layer
                 if let primaryCard = group.primaryCard, let image = loadThumbnail(for: primaryCard) {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                    Color.clear
+                        .frame(maxWidth: .infinity)
                         .frame(height: 120)
+                        .overlay {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        }
                         .clipped()
                 } else {
                     Rectangle()
