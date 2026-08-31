@@ -159,7 +159,7 @@ enum ScreenshotHarness {
 
     /// For the "barcode" screen, which card to open (by name).
     static var cardName: String {
-        argument(after: "-card") ?? "Safeway Club"
+        argument(after: "-card") ?? "Grocery Rewards"
     }
 
     private static func argument(after flag: String) -> String? {
@@ -176,12 +176,12 @@ enum ScreenshotHarness {
     }
 
     static let samples: [Sample] = [
-        Sample(name: "Safeway Club", data: "2847193056", format: .code128, favorite: false),
-        Sample(name: "Starbucks Rewards", data: "SBUX88912245", format: .qr, favorite: true),
-        Sample(name: "CVS ExtraCare", data: "4025519987", format: .code128, favorite: false),
-        Sample(name: "United MileagePlus", data: "MP58204417", format: .pdf417, favorite: false),
-        Sample(name: "Chipotle Rewards", data: "CMG773412200", format: .aztec, favorite: false),
-        Sample(name: "Costco Membership", data: "111827465003", format: .code39, favorite: false),
+        Sample(name: "Grocery Rewards", data: "2847193056", format: .code128, favorite: false),
+        Sample(name: "Coffee Shop", data: "MBR88912245", format: .qr, favorite: true),
+        Sample(name: "Pharmacy Card", data: "4025519987", format: .code128, favorite: false),
+        Sample(name: "Airline Miles", data: "FLY58204417", format: .pdf417, favorite: false),
+        Sample(name: "Gym Membership", data: "GYM773412200", format: .aztec, favorite: false),
+        Sample(name: "Warehouse Club", data: "111827465003", format: .code39, favorite: false),
     ]
 
     @MainActor
