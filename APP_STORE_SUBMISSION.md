@@ -34,7 +34,7 @@ is metadata + review, which happens in **App Store Connect** (web) and **Xcode O
 | SKU | `yeetcard-ios` (any unique string) |
 | Version string | `1.0` (`MARKETING_VERSION`) |
 | Build | next unused `CURRENT_PROJECT_VERSION` (currently `1`) |
-| Team | `99T37T366A` |
+| Team | _your Apple Developer Team ID_ (set in Xcode → Signing & Capabilities) |
 | Min iOS | 26.1 (unchanged — reach is intentionally not a concern) |
 | Price | Free |
 | Primary category | Utilities |
