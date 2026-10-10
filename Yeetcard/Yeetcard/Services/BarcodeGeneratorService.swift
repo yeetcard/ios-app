@@ -43,6 +43,8 @@ final class BarcodeGeneratorService: BarcodeGeneratorServiceProtocol {
             ciImage = generateCode39(data: data)
         case .ean13:
             ciImage = generateEAN13(data: data)
+        case .codabar:
+            ciImage = generateCodabar(data: data)
         default:
             return nil
         }
@@ -119,6 +121,51 @@ final class BarcodeGeneratorService: BarcodeGeneratorServiceProtocol {
         modules.append(contentsOf: repeatElement(false, count: quietZone))
         for (i, ch) in chars.enumerated() {
             let pattern = Self.code39Patterns[ch]!
+            for (j, width) in pattern.enumerated() {
+                let isBar = j % 2 == 0
+                modules.append(contentsOf: repeatElement(isBar, count: width))
+            }
+            if i < chars.count - 1 {
+                modules.append(false) // inter-character gap
+            }
+        }
+        modules.append(contentsOf: repeatElement(false, count: quietZone))
+
+        return renderModulesToCIImage(modules: modules, height: 80)
+    }
+
+    // MARK: - Codabar
+
+    // Each character is 7 elements: alternating bar/space widths (1=narrow, 3=wide)
+    private static let codabarPatterns: [Character: [Int]] = [
+        "0": [1,1,1,1,1,3,3], "1": [1,1,1,1,3,3,1],
+        "2": [1,1,1,3,1,1,3], "3": [3,3,1,1,1,1,1],
+        "4": [1,1,3,1,1,3,1], "5": [3,1,1,1,1,3,1],
+        "6": [1,3,1,1,1,1,3], "7": [1,3,1,1,3,1,1],
+        "8": [1,3,3,1,1,1,1], "9": [3,1,1,3,1,1,1],
+        "-": [1,1,1,3,3,1,1], "$": [1,1,3,3,1,1,1],
+        ":": [3,1,1,1,3,1,3], "/": [3,1,3,1,1,1,3],
+        ".": [3,1,3,1,3,1,1], "+": [1,1,3,1,3,1,3],
+        "A": [1,1,3,3,1,3,1], "B": [1,3,1,3,1,1,3],
+        "C": [1,1,1,3,1,3,3], "D": [1,1,1,3,3,3,1],
+    ]
+
+    private func generateCodabar(data: String) -> CIImage? {
+        // Scanned payloads keep their own start/stop characters; typed-in numbers get A...A
+        let framed = BarcodeFormat.hasCodabarStartStop(data) ? data : "A\(data)A"
+        let chars = Array(framed.uppercased())
+        for ch in chars {
+            guard Self.codabarPatterns[ch] != nil else { return nil }
+        }
+        // A-D are only valid as the start/stop characters
+        guard !chars.dropFirst().dropLast().contains(where: { "ABCD".contains($0) }) else { return nil }
+
+        var modules: [Bool] = []
+        let quietZone = 10
+
+        modules.append(contentsOf: repeatElement(false, count: quietZone))
+        for (i, ch) in chars.enumerated() {
+            let pattern = Self.codabarPatterns[ch]!
             for (j, width) in pattern.enumerated() {
                 let isBar = j % 2 == 0
                 modules.append(contentsOf: repeatElement(isBar, count: width))
@@ -261,7 +308,10 @@ final class BarcodeGeneratorService: BarcodeGeneratorServiceProtocol {
             return data.count == 12 && data.allSatisfy { $0.isNumber }
         case .upcE:
             return data.count == 8 && data.allSatisfy { $0.isNumber }
-        case .qr, .code128, .code39, .pdf417, .aztec, .dataMatrix, .code93, .codabar, .itf,
+        case .codabar:
+            let body = BarcodeFormat.hasCodabarStartStop(data) ? data.dropFirst().dropLast() : Substring(data)
+            return !body.isEmpty && body.allSatisfy { "0123456789-$:/.+".contains($0) }
+        case .qr, .code128, .code39, .pdf417, .aztec, .dataMatrix, .code93, .itf,
              .gs1DataBar, .msiPlessey, .microQR, .microPDF417:
             return true
         }

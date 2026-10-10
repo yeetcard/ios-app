@@ -199,7 +199,7 @@ struct BarcodeFormatTests {
     }
 
     @Test func canGenerateFormats() {
-        let expected: Set<BarcodeFormat> = [.qr, .code128, .pdf417, .aztec, .code39, .ean13]
+        let expected: Set<BarcodeFormat> = [.qr, .code128, .pdf417, .aztec, .code39, .ean13, .codabar]
         let actual = Set(BarcodeFormat.allCases.filter { $0.canGenerate })
         #expect(actual == expected)
     }
@@ -208,6 +208,13 @@ struct BarcodeFormatTests {
         let expected: Set<BarcodeFormat> = [.qr, .code128, .pdf417, .aztec]
         let actual = Set(BarcodeFormat.allCases.filter { $0.isWalletCompatible })
         #expect(actual == expected)
+    }
+
+    @Test func codabarDisplayValueDropsStartStopCharacters() {
+        #expect(BarcodeFormat.codabar.displayValue(for: "A40156B") == "40156")
+        #expect(BarcodeFormat.codabar.displayValue(for: "40156") == "40156")
+        // Other formats are shown as-is, even if they happen to start and end with A-D
+        #expect(BarcodeFormat.code128.displayValue(for: "A40156B") == "A40156B")
     }
 
     @Test func rawValueRoundtrip() {
@@ -396,6 +403,17 @@ struct BarcodeGeneratorServiceTests {
         #expect(image!.size.height > 0)
     }
 
+    @Test func generatesCodabar() {
+        // As scanned (with start/stop characters) and as typed (digits only)
+        #expect(service.generateBarcode(data: "A40156B", format: .codabar) != nil)
+        #expect(service.generateBarcode(data: "40156", format: .codabar) != nil)
+    }
+
+    @Test func returnsNilForInvalidCodabar() {
+        #expect(service.generateBarcode(data: "12X45", format: .codabar) == nil)
+        #expect(service.generateBarcode(data: "A12B34C", format: .codabar) == nil)
+    }
+
     @Test func returnsNilForNonGeneratableFormats() {
         #expect(service.generateBarcode(data: "12345", format: .dataMatrix) == nil)
     }
@@ -434,6 +452,14 @@ struct BarcodeGeneratorServiceTests {
     @Test func validateUPCE() {
         #expect(service.validateBarcodeData("12345678", for: .upcE) == true)
         #expect(service.validateBarcodeData("1234567", for: .upcE) == false)
+    }
+
+    @Test func validateCodabar() {
+        #expect(service.validateBarcodeData("A40156B", for: .codabar) == true)
+        #expect(service.validateBarcodeData("40156", for: .codabar) == true)
+        #expect(service.validateBarcodeData("12-34$56", for: .codabar) == true)
+        #expect(service.validateBarcodeData("12X45", for: .codabar) == false)
+        #expect(service.validateBarcodeData("AB", for: .codabar) == false)
     }
 
     @Test func validateRejectsEmpty() {
@@ -498,7 +524,7 @@ struct ManualEntryViewModelTests {
         for format in formats {
             #expect(format.canGenerate == true)
         }
-        #expect(formats.count == 6) // QR, Code128, PDF417, Aztec, Code39, EAN-13
+        #expect(formats.count == 7) // QR, Code128, Code39, EAN-13, Codabar, PDF417, Aztec
     }
 
     @Test @MainActor func resetClearsAllFields() {
