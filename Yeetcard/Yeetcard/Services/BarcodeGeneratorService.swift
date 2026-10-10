@@ -261,7 +261,8 @@ final class BarcodeGeneratorService: BarcodeGeneratorServiceProtocol {
             return data.count == 12 && data.allSatisfy { $0.isNumber }
         case .upcE:
             return data.count == 8 && data.allSatisfy { $0.isNumber }
-        case .qr, .code128, .code39, .pdf417, .aztec, .dataMatrix:
+        case .qr, .code128, .code39, .pdf417, .aztec, .dataMatrix, .code93, .codabar, .itf,
+             .gs1DataBar, .msiPlessey, .microQR, .microPDF417:
             return true
         }
     }

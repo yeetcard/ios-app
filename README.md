@@ -18,8 +18,9 @@ Everything stays on the device: no account, no sign-up, no tracking, no server.
 
 ### Card Scanning
 Scan barcodes and QR codes with the camera, with real-time detection via Apple's Vision
-framework. Supported formats: QR Code, Code 128, Code 39, EAN-13, EAN-8, UPC-A, UPC-E,
-PDF417, Aztec, and Data Matrix. Auto-capture triggers when a barcode stays stable for about
+framework. Supported formats: QR Code, Micro QR, Code 128, Code 39, Code 93, Codabar,
+Interleaved 2 of 5 / ITF-14, EAN-13, EAN-8, UPC-A, UPC-E, GS1 DataBar, MSI Plessey, PDF417,
+MicroPDF417, Aztec, and Data Matrix. Auto-capture triggers when a barcode stays in view for about
 a second; manual capture is always available.
 
 ### Manual Entry
@@ -211,6 +212,17 @@ strings: `NSCameraUsageDescription`, `NSMicrophoneUsageDescription`, and
 
 - **Unit tests:** `YeetcardTests`
 - **UI tests:** `YeetcardUITests`
+
+Tests run on the iOS 27 Simulator (Xcode 27 or later); the app itself still deploys back to
+iOS 26.1:
+
+```sh
+xcodebuild test -project Yeetcard/Yeetcard.xcodeproj -scheme Yeetcard \
+  -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0'
+```
+
+Always include `OS=` in the destination. Without it `xcodebuild` picks the newest installed
+runtime and fails if that runtime has no simulator with the given name.
 
 A DEBUG-only screenshot harness (compiled out of Release builds) can seed sample cards and
 route directly to a screen via the `-screenshots` launch argument, for capturing App Store

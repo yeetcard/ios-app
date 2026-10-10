@@ -731,6 +731,22 @@ struct BarcodeDetectionServiceTests {
         }
     }
 
+    @Test func requestsCommonCardSymbologies() {
+        let formats = BarcodeDetectionService.formatsBySymbology
+
+        // Previously missing, so cards using them were never detected (library cards are Codabar)
+        #expect(formats[.codabar] == .codabar)
+        #expect(formats[.i2of5] == .itf)
+        #expect(formats[.itf14] == .itf)
+        #expect(formats[.code93] == .code93)
+        #expect(formats[.gs1DataBar] == .gs1DataBar)
+
+        #expect(formats[.qr] == .qr)
+        #expect(formats[.code128] == .code128)
+        #expect(formats[.ean13] == .ean13)
+        #expect(formats[.upce] == .upcE)
+    }
+
     @Test func returnsEmptyForBlankImage() async {
         let detector = BarcodeDetectionService()
         let fmt = UIGraphicsImageRendererFormat()
@@ -1002,37 +1018,86 @@ struct ScannerViewModelTests {
         #expect(mock.capturePhotoCalled, "capturePhoto should be called when barcode is confirmed")
     }
 
-    @Test @MainActor func differentBarcodeResetsDetectionTimer() {
+    @Test @MainActor func differentBarcodeReplacesCandidateOnceOriginalIsGone() {
         let mock = MockCameraService()
-        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 1.0, dropoutTolerance: 0.5)
         vm.hasPermission = true
         vm.startScanning()
 
         let barcode1 = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
         let barcode2 = DetectedBarcode(data: "67890", format: .qr, boundingBox: .zero)
+        let start = Date()
 
-        vm.processBarcodeDetections([barcode1])
-        vm.processBarcodeDetections([barcode2])
+        vm.processBarcodeDetections([barcode1], at: start)
+        vm.processBarcodeDetections([barcode2], at: start.addingTimeInterval(0.8))
+        vm.processBarcodeDetections([barcode2], at: start.addingTimeInterval(1.2))
 
-        #expect(vm.state == .scanning, "Different barcode should reset detection, not trigger capture")
+        #expect(vm.state == .scanning, "barcode2's timer should start at 0.8s, not inherit barcode1's")
         #expect(!mock.capturePhotoCalled)
+
+        vm.processBarcodeDetections([barcode2], at: start.addingTimeInterval(1.9))
+
+        #expect(vm.state == .detected(barcode2))
     }
 
-    @Test @MainActor func emptyDetectionResetsTracking() {
+    @Test @MainActor func briefDropoutsDoNotResetTracking() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 1.0, dropoutTolerance: 0.5)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "A40156B", format: .codabar, boundingBox: .zero)
+        let start = Date()
+
+        // Vision misses the odd frame while the camera moves or refocuses
+        vm.processBarcodeDetections([barcode], at: start)
+        vm.processBarcodeDetections([], at: start.addingTimeInterval(0.2))
+        vm.processBarcodeDetections([], at: start.addingTimeInterval(0.4))
+        vm.processBarcodeDetections([barcode], at: start.addingTimeInterval(0.6))
+        vm.processBarcodeDetections([], at: start.addingTimeInterval(0.8))
+        vm.processBarcodeDetections([barcode], at: start.addingTimeInterval(1.1))
+
+        #expect(vm.state == .detected(barcode))
+        #expect(mock.capturePhotoCalled)
+    }
+
+    @Test @MainActor func prolongedDropoutResetsTracking() {
+        let mock = MockCameraService()
+        let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 1.0, dropoutTolerance: 0.5)
+        vm.hasPermission = true
+        vm.startScanning()
+
+        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
+        let start = Date()
+
+        vm.processBarcodeDetections([barcode], at: start)
+        // Gone for longer than the tolerance — resets tracking
+        vm.processBarcodeDetections([], at: start.addingTimeInterval(0.8))
+        // Same barcode again starts a fresh timer
+        vm.processBarcodeDetections([barcode], at: start.addingTimeInterval(1.0))
+
+        #expect(vm.state == .scanning)
+        #expect(!mock.capturePhotoCalled)
+
+        vm.processBarcodeDetections([barcode], at: start.addingTimeInterval(2.1))
+
+        #expect(vm.state == .detected(barcode))
+    }
+
+    @Test @MainActor func candidateTrackedWhenOtherBarcodesAreInFrame() {
         let mock = MockCameraService()
         let vm = ScannerViewModel(cameraService: mock, requiredDetectionDuration: 0)
         vm.hasPermission = true
         vm.startScanning()
 
-        let barcode = DetectedBarcode(data: "12345", format: .qr, boundingBox: .zero)
-        vm.processBarcodeDetections([barcode])
-        // No barcodes seen — resets tracking
-        vm.processBarcodeDetections([])
-        // Same barcode again should start fresh (not trigger detection)
-        vm.processBarcodeDetections([barcode])
+        let barcode1 = DetectedBarcode(data: "12345", format: .code128, boundingBox: .zero)
+        let barcode2 = DetectedBarcode(data: "https://example.com", format: .qr, boundingBox: .zero)
 
-        #expect(vm.state == .scanning)
-        #expect(!mock.capturePhotoCalled)
+        vm.processBarcodeDetections([barcode1, barcode2])
+        // Vision's ordering isn't stable between frames
+        vm.processBarcodeDetections([barcode2, barcode1])
+
+        #expect(vm.state == .detected(barcode1))
     }
 
     @Test @MainActor func handlePhotoCapturedTransitionsToCapturedState() {
