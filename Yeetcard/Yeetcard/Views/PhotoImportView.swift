@@ -106,7 +106,7 @@ struct PhotoImportView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-                Text(barcode.data)
+                Text(barcode.format.displayValue(for: barcode.data))
                     .font(.system(.body, design: .monospaced))
                     .textSelection(.enabled)
                     .padding()

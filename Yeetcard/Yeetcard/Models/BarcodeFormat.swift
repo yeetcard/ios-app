@@ -59,11 +59,26 @@ nonisolated enum BarcodeFormat: String, Codable, CaseIterable {
 
     var canGenerate: Bool {
         switch self {
-        case .qr, .code128, .pdf417, .aztec, .code39, .ean13:
+        case .qr, .code128, .pdf417, .aztec, .code39, .ean13, .codabar:
             return true
-        case .ean8, .upcA, .upcE, .code93, .codabar, .itf, .gs1DataBar, .msiPlessey,
+        case .ean8, .upcA, .upcE, .code93, .itf, .gs1DataBar, .msiPlessey,
              .dataMatrix, .microQR, .microPDF417:
             return false
         }
+    }
+
+    /// The barcode value as printed on the card, for display and sharing.
+    func displayValue(for data: String) -> String {
+        guard self == .codabar, Self.hasCodabarStartStop(data) else { return data }
+        return String(data.dropFirst().dropLast())
+    }
+
+    /// Codabar data is framed by start/stop characters (A–D). Scanned payloads keep them so the
+    /// barcode re-renders exactly, but they aren't part of the number printed on the card.
+    static func hasCodabarStartStop(_ data: String) -> Bool {
+        let startStop: Set<Character> = ["A", "B", "C", "D"]
+        let upper = data.uppercased()
+        guard upper.count > 2, let first = upper.first, let last = upper.last else { return false }
+        return startStop.contains(first) && startStop.contains(last)
     }
 }

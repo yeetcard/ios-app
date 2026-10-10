@@ -115,7 +115,7 @@ struct SingleCardBarcodeContent: View {
                     .foregroundStyle(.gray)
             }
 
-            Text(card.barcodeData)
+            Text(card.barcodeFormat.displayValue(for: card.barcodeData))
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(.gray)
                 .textSelection(.enabled)
@@ -134,7 +134,7 @@ struct SingleCardBarcodeContent: View {
         switch card.barcodeFormat {
         case .qr, .aztec:
             size = CGSize(width: pixelWidth, height: pixelWidth)
-        case .code128, .code39, .ean13:
+        case .code128, .code39, .ean13, .codabar:
             size = CGSize(width: pixelWidth, height: pixelWidth * 0.4)
         case .pdf417:
             size = CGSize(width: pixelWidth, height: pixelWidth * 0.3)

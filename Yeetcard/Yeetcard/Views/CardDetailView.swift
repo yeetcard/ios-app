@@ -57,9 +57,9 @@ struct CardDetailView: View {
                         }
 
                         ShareLink(
-                            item: viewModel.card.barcodeData,
+                            item: viewModel.card.barcodeFormat.displayValue(for: viewModel.card.barcodeData),
                             subject: Text(viewModel.card.name),
-                            message: Text("Barcode: \(viewModel.card.barcodeData)")
+                            message: Text("Barcode: \(viewModel.card.barcodeFormat.displayValue(for: viewModel.card.barcodeData))")
                         ) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
@@ -152,7 +152,7 @@ struct CardDetailView: View {
             .font(.subheadline)
             .foregroundStyle(.secondary)
 
-            Text(viewModel.card.barcodeData)
+            Text(viewModel.card.barcodeFormat.displayValue(for: viewModel.card.barcodeData))
                 .font(.system(.body, design: .monospaced))
                 .textSelection(.enabled)
                 .padding()
