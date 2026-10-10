@@ -7,7 +7,7 @@ import Vision
 import AVFoundation
 import UIKit
 
-struct DetectedBarcode {
+nonisolated struct DetectedBarcode {
     let data: String
     let format: BarcodeFormat
     let boundingBox: CGRect
@@ -17,48 +17,55 @@ protocol BarcodeDetectionServiceProtocol {
     func detectBarcodes(in image: UIImage) async -> [DetectedBarcode]
 }
 
-final class BarcodeDetectionService: BarcodeDetectionServiceProtocol {
-    private let supportedSymbologies: [VNBarcodeSymbology] = [
-        .qr,
-        .code128,
-        .code39,
-        .ean13,
-        .ean8,
-        .upce,
-        .pdf417,
-        .aztec,
-        .dataMatrix
+// Nonisolated so the scanner can run detection on the camera's video queue and photo import can
+// run it off the main actor.
+nonisolated final class BarcodeDetectionService: BarcodeDetectionServiceProtocol, Sendable {
+    // Vision only reports the symbologies it is asked for, so anything missing here is never
+    // found, however clearly it shows up in the frame (library cards, for example, are Codabar).
+    static let formatsBySymbology: [VNBarcodeSymbology: BarcodeFormat] = [
+        .qr: .qr,
+        .microQR: .microQR,
+        .code128: .code128,
+        .code39: .code39,
+        .code93: .code93,
+        .ean13: .ean13,
+        .ean8: .ean8,
+        .upce: .upcE,
+        .codabar: .codabar,
+        .i2of5: .itf,
+        .itf14: .itf,
+        .gs1DataBar: .gs1DataBar,
+        .gs1DataBarExpanded: .gs1DataBar,
+        .gs1DataBarLimited: .gs1DataBar,
+        .msiPlessey: .msiPlessey,
+        .pdf417: .pdf417,
+        .microPDF417: .microPDF417,
+        .aztec: .aztec,
+        .dataMatrix: .dataMatrix
     ]
 
-    func detectBarcodes(in sampleBuffer: CMSampleBuffer) async -> [DetectedBarcode] {
+    func detectBarcodes(in sampleBuffer: CMSampleBuffer) -> [DetectedBarcode] {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             return []
         }
 
-        return await detectBarcodes(in: pixelBuffer)
+        return detectBarcodes(in: pixelBuffer)
     }
 
-    func detectBarcodes(in pixelBuffer: CVPixelBuffer) async -> [DetectedBarcode] {
-        let request = VNDetectBarcodesRequest()
-        request.symbologies = supportedSymbologies
-
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
-
-        do {
-            try handler.perform([request])
-            return processResults(request.results)
-        } catch {
-            return []
-        }
+    func detectBarcodes(in pixelBuffer: CVPixelBuffer) -> [DetectedBarcode] {
+        perform(VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:]))
     }
 
+    @concurrent
     func detectBarcodes(in image: UIImage) async -> [DetectedBarcode] {
         guard let cgImage = image.cgImage else { return [] }
 
-        let request = VNDetectBarcodesRequest()
-        request.symbologies = supportedSymbologies
+        return perform(VNImageRequestHandler(cgImage: cgImage, options: [:]))
+    }
 
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+    private func perform(_ handler: VNImageRequestHandler) -> [DetectedBarcode] {
+        let request = VNDetectBarcodesRequest()
+        request.symbologies = Array(Self.formatsBySymbology.keys)
 
         do {
             try handler.perform([request])
@@ -72,40 +79,14 @@ final class BarcodeDetectionService: BarcodeDetectionServiceProtocol {
         guard let observations = results else { return [] }
 
         return observations.compactMap { observation in
-            guard let payloadString = observation.payloadStringValue else { return nil }
-
-            let format = mapSymbologyToFormat(observation.symbology)
+            guard let payloadString = observation.payloadStringValue,
+                  let format = Self.formatsBySymbology[observation.symbology] else { return nil }
 
             return DetectedBarcode(
                 data: payloadString,
                 format: format,
                 boundingBox: observation.boundingBox
             )
-        }
-    }
-
-    private func mapSymbologyToFormat(_ symbology: VNBarcodeSymbology) -> BarcodeFormat {
-        switch symbology {
-        case .qr:
-            return .qr
-        case .code128:
-            return .code128
-        case .code39:
-            return .code39
-        case .ean13:
-            return .ean13
-        case .ean8:
-            return .ean8
-        case .upce:
-            return .upcE
-        case .pdf417:
-            return .pdf417
-        case .aztec:
-            return .aztec
-        case .dataMatrix:
-            return .dataMatrix
-        default:
-            return .qr
         }
     }
 

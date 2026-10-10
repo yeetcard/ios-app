@@ -119,6 +119,7 @@ final class CameraService: NSObject, CameraServiceProtocol {
                     }
 
                     self.captureSession.commitConfiguration()
+                    CameraService.configureForBarcodeScanning(device)
                     continuation.resume()
                 } catch {
                     self.captureSession.commitConfiguration()
@@ -126,6 +127,41 @@ final class CameraService: NSObject, CameraServiceProtocol {
                 }
             }
         }
+    }
+
+    /// People hold a card close to fill the scan frame, which is often inside the camera's minimum
+    /// focus distance (about 20 cm on Pro iPhones), leaving frames too soft for Vision to decode.
+    /// Bias autofocus to near subjects and zoom in just enough that the user naturally holds the
+    /// card beyond that distance. Same approach as Apple's AVCamBarcode sample.
+    nonisolated private static func configureForBarcodeScanning(_ device: AVCaptureDevice) {
+        do {
+            try device.lockForConfiguration()
+        } catch {
+            return
+        }
+        defer { device.unlockForConfiguration() }
+
+        if device.isFocusModeSupported(.continuousAutoFocus) {
+            device.focusMode = .continuousAutoFocus
+        }
+        if device.isAutoFocusRangeRestrictionSupported {
+            device.autoFocusRangeRestriction = .near
+        }
+
+        // Narrowest barcode (mm) we expect someone to fill the scan frame with, and roughly how
+        // much of the sensor's long-side field of view the on-screen scan frame covers.
+        let smallestBarcodeWidth: Float = 40
+        let scanFrameFieldOfViewFraction: Float = 0.3
+
+        let minimumFocusDistance = Float(device.minimumFocusDistance)
+        guard minimumFocusDistance > 0 else { return }
+
+        let halfFieldOfView = device.activeFormat.videoFieldOfView * .pi / 360
+        let distanceToFillFrame = (smallestBarcodeWidth / 2) / (tan(halfFieldOfView) * scanFrameFieldOfViewFraction)
+        guard distanceToFillFrame < minimumFocusDistance else { return }
+
+        let zoomFactor = CGFloat(minimumFocusDistance / distanceToFillFrame)
+        device.videoZoomFactor = min(zoomFactor, device.activeFormat.videoMaxZoomFactor)
     }
 
     func startSession() {

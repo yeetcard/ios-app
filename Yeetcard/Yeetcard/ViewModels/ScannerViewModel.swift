@@ -33,11 +33,13 @@ final class ScannerViewModel {
     }
 
     private let cameraService: any CameraServiceProtocol
-    private let barcodeDetectionService = BarcodeDetectionService()
+    nonisolated private let barcodeDetectionService = BarcodeDetectionService()
 
     private var lastDetectedBarcode: DetectedBarcode?
     private var detectionStartTime: Date?
+    private var lastSeenTime: Date?
     let requiredDetectionDuration: TimeInterval
+    let dropoutTolerance: TimeInterval
 
     var state: ScannerState = .idle
     var hasPermission: Bool = false
@@ -52,9 +54,11 @@ final class ScannerViewModel {
     }
 
     init(cameraService: any CameraServiceProtocol = CameraService(),
-         requiredDetectionDuration: TimeInterval = 1.0) {
+         requiredDetectionDuration: TimeInterval = 1.0,
+         dropoutTolerance: TimeInterval = 0.5) {
         self.cameraService = cameraService
         self.requiredDetectionDuration = requiredDetectionDuration
+        self.dropoutTolerance = dropoutTolerance
         self.cameraService.delegate = self
     }
 
@@ -93,29 +97,35 @@ final class ScannerViewModel {
     func reset() {
         lastDetectedBarcode = nil
         detectionStartTime = nil
+        lastSeenTime = nil
         state = .scanning
     }
 
-    func processBarcodeDetections(_ detectedBarcodes: [DetectedBarcode]) {
+    func processBarcodeDetections(_ detectedBarcodes: [DetectedBarcode], at now: Date = Date()) {
         guard case .scanning = state else { return }
 
-        if let barcode = detectedBarcodes.first {
-            if let lastBarcode = lastDetectedBarcode,
-               lastBarcode.data == barcode.data,
-               lastBarcode.format == barcode.format {
-                if let startTime = detectionStartTime,
-                   Date().timeIntervalSince(startTime) >= requiredDetectionDuration {
-                    state = .detected(barcode)
-                    cameraService.capturePhoto()
-                }
-            } else {
-                lastDetectedBarcode = barcode
-                detectionStartTime = Date()
+        // Look for the candidate anywhere in the frame: Vision's ordering isn't stable when more
+        // than one code is visible.
+        if let candidate = lastDetectedBarcode,
+           detectedBarcodes.contains(where: { $0.data == candidate.data && $0.format == candidate.format }) {
+            lastSeenTime = now
+            if let startTime = detectionStartTime,
+               now.timeIntervalSince(startTime) >= requiredDetectionDuration {
+                state = .detected(candidate)
+                cameraService.capturePhoto()
             }
-        } else {
-            lastDetectedBarcode = nil
-            detectionStartTime = nil
+            return
         }
+
+        // Vision misses the odd frame (motion blur, refocusing), so only drop the candidate once
+        // it has been out of sight for a while.
+        if let lastSeen = lastSeenTime, now.timeIntervalSince(lastSeen) <= dropoutTolerance {
+            return
+        }
+
+        lastDetectedBarcode = detectedBarcodes.first
+        detectionStartTime = detectedBarcodes.isEmpty ? nil : now
+        lastSeenTime = detectionStartTime
     }
 
     func handlePhotoCaptured(_ image: UIImage) {
@@ -137,12 +147,13 @@ extension ScannerViewModel: CameraServiceDelegate {
     }
 
     nonisolated func cameraService(_ service: any CameraServiceProtocol, didOutputSampleBuffer sampleBuffer: CMSampleBuffer) {
-        Task {
-            let detectedBarcodes = await barcodeDetectionService.detectBarcodes(in: sampleBuffer)
+        // Called on the camera's video queue. Detecting synchronously keeps Vision off the main
+        // thread and lets the capture output drop frames while we're busy, rather than queueing
+        // a task per frame.
+        let detectedBarcodes = barcodeDetectionService.detectBarcodes(in: sampleBuffer)
 
-            await MainActor.run {
-                processBarcodeDetections(detectedBarcodes)
-            }
+        Task { @MainActor in
+            processBarcodeDetections(detectedBarcodes)
         }
     }
 

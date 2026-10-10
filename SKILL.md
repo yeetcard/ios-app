@@ -46,7 +46,7 @@ CRUD wrapper for SwiftData. All Card operations go through this service. Coordin
 AVCaptureSession management. Back camera only. Provides startSession(), stopSession(), capturePhoto(), toggleFlash(). Handles permission checks.
 
 ### BarcodeDetectionService
-Vision framework VNDetectBarcodesRequest. Real-time detection from CVPixelBuffer. Returns barcode data, format, and bounding box. Supports: QR, Code128, Code39, EAN-13, EAN-8, UPC-A, UPC-E, PDF417, Aztec, Data Matrix.
+Vision framework VNDetectBarcodesRequest. Real-time detection from CVPixelBuffer. Returns barcode data, format, and bounding box. Supports: QR, Micro QR, Code128, Code39, Code93, Codabar, Interleaved 2 of 5 / ITF-14, EAN-13, EAN-8, UPC-A (reported as EAN-13), UPC-E, GS1 DataBar, MSI Plessey, PDF417, MicroPDF417, Aztec, Data Matrix. Vision only reports symbologies it is asked for, so `formatsBySymbology` must list every format the app stores.
 
 ### ImageStorageService
 File system operations for card images. Save, load, delete, generate thumbnails. Uses Documents directory with UUID-based filenames.
@@ -60,7 +60,7 @@ LocalAuthentication wrapper. Checks biometric availability (Face ID vs Touch ID 
 ## Key Implementation Notes
 
 ### Camera + Vision Pipeline
-CameraService provides AVCaptureVideoDataOutput frames to BarcodeDetectionService. Detection runs on every frame. When same barcode detected for 1 second, auto-capture triggers. ScannerViewModel coordinates this flow and updates published state.
+CameraService provides AVCaptureVideoDataOutput frames to BarcodeDetectionService. Detection runs synchronously on the video queue (late frames are dropped while Vision is busy). When the same barcode stays in view for 1 second, auto-capture triggers; brief dropouts (up to 0.5s) don't reset the timer. CameraService biases autofocus to near subjects and zooms so close-up codes stay beyond the lens's minimum focus distance. ScannerViewModel coordinates this flow and updates published state.
 
 ### Wallet Flow
 1. CardDetailView shows "Add to Wallet" only if `isWalletCompatible(card)` returns true
