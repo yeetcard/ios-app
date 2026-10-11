@@ -30,7 +30,7 @@ final class GalleryViewModel {
     var showFavoritesOnly: Bool = false
     var isLoading: Bool = false
 
-    var filteredCards: [Card] {
+    private var filteredCards: [Card] {
         cardDataService?.fetchCards(
             searchText: searchText,
             sortBy: sortOption,
@@ -38,8 +38,10 @@ final class GalleryViewModel {
         ) ?? []
     }
 
+    // Derived from the stored `cards` rather than a fresh fetch, so the gallery
+    // is observing state that loadCards() changes and re-renders after a delete.
     var ungroupedCards: [Card] {
-        filteredCards.filter { $0.group == nil }
+        cards.filter { $0.group == nil }
     }
 
     var filteredGroups: [CardGroup] {

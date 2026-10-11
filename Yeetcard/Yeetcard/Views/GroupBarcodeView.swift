@@ -54,7 +54,7 @@ struct GroupBarcodeView: View {
             ToolbarItem(placement: .primaryAction) {
                 if let card = currentCard {
                     NavigationLink {
-                        CardDetailView(card: card)
+                        CardDetailView(card: card, onDelete: { dismiss() })
                     } label: {
                         Image(systemName: "info.circle")
                     }
