@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Observation
 import SwiftData
 import UIKit
 import PassKit
@@ -948,6 +949,62 @@ struct CardDetailViewModelTests {
         let card = Card(name: "Card", barcodeData: "data", barcodeFormat: .qr)
         let vm = CardDetailViewModel(card: card)
         #expect(vm.cardImage == nil)
+    }
+}
+
+// MARK: - GalleryViewModel Tests
+
+/// Records whether an Observation `onChange` callback fired.
+private final class ObservationFlag: @unchecked Sendable {
+    var fired = false
+}
+
+@Suite("GalleryViewModel")
+struct GalleryViewModelTests {
+    /// Runs `change` and reports whether it invalidated `galleryItems`, which the gallery grid renders from.
+    @MainActor
+    private func invalidatesGalleryItems(_ vm: GalleryViewModel, _ change: () -> Void) -> Bool {
+        let flag = ObservationFlag()
+        withObservationTracking {
+            _ = vm.galleryItems
+        } onChange: {
+            flag.fired = true
+        }
+        change()
+        return flag.fired
+    }
+
+    @Test @MainActor func deleteCardRefreshesGallery() throws {
+        let context = try makeInMemoryModelContext()
+        let service = CardDataService(modelContext: context)
+        let keep = service.createCard(name: "Keep", barcodeData: "1", barcodeFormat: .qr, image: nil)
+        let doomed = service.createCard(name: "Delete Me", barcodeData: "2", barcodeFormat: .qr, image: nil)
+        let vm = GalleryViewModel()
+        vm.setup(modelContext: context)
+
+        let refreshed = invalidatesGalleryItems(vm) { vm.deleteCard(doomed) }
+
+        #expect(refreshed)
+        #expect(vm.ungroupedCards.map(\.id) == [keep.id])
+    }
+
+    @Test @MainActor func reloadAfterDetailDeleteRefreshesGallery() throws {
+        let context = try makeInMemoryModelContext()
+        let service = CardDataService(modelContext: context)
+        let card = service.createCard(name: "Delete Me", barcodeData: "1", barcodeFormat: .qr, image: nil)
+        let vm = GalleryViewModel()
+        vm.setup(modelContext: context)
+
+        // The detail screen deletes through its own view model; the gallery reloads when navigated back to.
+        let detail = CardDetailViewModel(card: card)
+        detail.setup(modelContext: context)
+        let refreshed = invalidatesGalleryItems(vm) {
+            detail.deleteCard()
+            vm.loadCards()
+        }
+
+        #expect(refreshed)
+        #expect(vm.isEmpty)
     }
 }
 

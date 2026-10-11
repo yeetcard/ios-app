@@ -47,7 +47,7 @@ struct FullScreenBarcodeView: View {
             }
         }
         .navigationDestination(isPresented: $showDetail) {
-            CardDetailView(card: viewModel.card)
+            CardDetailView(card: viewModel.card, onDelete: { dismiss() })
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)

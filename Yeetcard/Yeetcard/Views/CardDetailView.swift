@@ -10,9 +10,14 @@ struct CardDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel: CardDetailViewModel
+    private let onDelete: (() -> Void)?
 
-    init(card: Card) {
+    /// - Parameter onDelete: Called after the card is deleted, instead of popping just this view.
+    ///   Presenters that are themselves showing the card pass their own dismiss so the user
+    ///   lands back on the card list rather than on the deleted card.
+    init(card: Card, onDelete: (() -> Void)? = nil) {
         _viewModel = State(initialValue: CardDetailViewModel(card: card))
+        self.onDelete = onDelete
     }
 
     var body: some View {
@@ -80,7 +85,11 @@ struct CardDetailView: View {
         .alert("Delete Card", isPresented: $viewModel.showDeleteConfirmation) {
             Button("Delete", role: .destructive) {
                 viewModel.deleteCard()
-                dismiss()
+                if let onDelete {
+                    onDelete()
+                } else {
+                    dismiss()
+                }
             }
             Button("Cancel", role: .cancel) {}
         } message: {

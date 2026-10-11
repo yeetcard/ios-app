@@ -103,6 +103,12 @@ struct GalleryView: View {
             .onChange(of: groupToEdit) { _, newValue in
                 if newValue == nil { viewModel.loadCards() }
             }
+            .onChange(of: selectedCard) { _, newValue in
+                if newValue == nil { viewModel.loadCards() }
+            }
+            .onChange(of: selectedGroup) { _, newValue in
+                if newValue == nil { viewModel.loadCards() }
+            }
             .onChange(of: viewModel.searchText) { _, _ in
                 viewModel.loadCards()
             }
